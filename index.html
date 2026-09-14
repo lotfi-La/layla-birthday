@@ -4,262 +4,99 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Happy Birthday Layla</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body, html { width: 100%; height: 100%; background: #050505; color: #fff; font-family: 'Tajawal', sans-serif; overflow-x: hidden; }
 
-        body {
-            background-color: #0d0d0d;
-            color: #ffffff;
-            font-family: 'Tajawal', sans-serif;
-            overflow-x: hidden;
-            user-select: none;
-        }
-
-        /* Netflix Intro Atmosphere */
+        /* Netflix Intro Screen */
         .intro-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: #000;
-            z-index: 999;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            transition: opacity 1.5s ease-out;
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: #000; z-index: 999; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            transition: opacity 1.2s ease, visibility 1.2s;
         }
-
+        .netflix-logo {
+            font-family: 'Cinzel', serif; font-size: 3rem; color: #E50914; font-weight: 900;
+            letter-spacing: 4px; margin-bottom: 20px; text-shadow: 0 0 20px rgba(229,9,20,0.8);
+        }
         .netflix-btn {
-            background: #E50914;
-            color: #fff;
-            border: none;
-            padding: 18px 45px;
-            font-size: 1.3rem;
-            font-weight: bold;
-            border-radius: 4px;
-            cursor: pointer;
-            box-shadow: 0 0 25px rgba(229, 9, 20, 0.6);
-            transition: transform 0.2s, background 0.3s;
+            background: #E50914; color: #fff; border: none; padding: 16px 40px;
+            font-size: 1.2rem; font-weight: bold; border-radius: 4px; cursor: pointer;
+            box-shadow: 0 0 30px rgba(229, 9, 20, 0.7); transition: transform 0.2s;
+        }
+        .netflix-btn:hover { transform: scale(1.05); }
+
+        /* Garden Canvas */
+        .canvas-container { position: relative; width: 100vw; height: 100vh; background: radial-gradient(circle at bottom, #110305 0%, #050505 100%); }
+        canvas { display: block; width: 100%; height: 100%; cursor: pointer; }
+
+        .instruction {
+            position: absolute; top: 40px; width: 100%; text-align: center;
+            font-size: 1.3rem; color: #eaeaea; pointer-events: none; animation: pulse 2s infinite;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+        }
+        @keyframes pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+
+        /* Dynamic Floating Text Overlay */
+        .message-popup {
+            position: absolute; background: rgba(229, 9, 20, 0.9); color: #fff;
+            padding: 12px 24px; border-radius: 25px; font-weight: bold; font-size: 1.1rem;
+            transform: translate(-50%, -100%); pointer-events: none; opacity: 0;
+            transition: opacity 0.4s ease, transform 0.4s ease;
+            box-shadow: 0 0 20px rgba(229, 9, 20, 0.6); backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.2);
         }
 
-        .netflix-btn:hover {
-            transform: scale(1.05);
-            background: #f40612;
-        }
-
-        /* Section 1: Flowers Scene */
-        .scene {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            background: radial-gradient(circle at center, #1a0507 0%, #050505 100%);
-        }
-
-        .instructions {
-            position: absolute;
-            top: 40px;
-            font-size: 1.2rem;
-            color: #e5e5e5;
-            letter-spacing: 1px;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 0.6; }
-            50% { opacity: 1; }
-        }
-
-        .garden {
-            display: flex;
-            gap: 40px;
-            margin-top: 50px;
-        }
-
-        .flower-pot {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            cursor: pointer;
-            position: relative;
-        }
-
-        .message-box {
-            position: absolute;
-            top: -70px;
-            background: rgba(229, 9, 20, 0.9);
-            color: white;
-            padding: 10px 18px;
-            border-radius: 8px;
-            font-size: 0.95rem;
-            font-weight: bold;
-            white-space: nowrap;
-            opacity: 0;
-            transform: translateY(10px);
-            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-            pointer-events: none;
-        }
-
-        .flower-pot.bloomed .message-box {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .flower-svg {
-            width: 90px;
-            height: 180px;
-            transition: transform 0.3s;
-        }
-
-        .flower-pot:hover .flower-svg {
-            transform: scale(1.1);
-        }
-
-        .petal {
-            transform-origin: center;
-            transition: transform 0.8s ease-out;
-            scale: 0;
-        }
-
-        .flower-pot.bloomed .petal {
-            scale: 1;
-        }
-
-        /* Section 2: Cinema Birthday Header */
+        /* Cinema Header Section */
         .cinema-section {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: #000;
-            position: relative;
-            text-align: center;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 2s ease-in-out;
+            min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+            justify-content: center; background: #000; text-align: center; opacity: 0;
+            transition: opacity 2s ease; pointer-events: none; position: relative;
         }
-
-        .cinema-section.active {
-            opacity: 1;
-            pointer-events: all;
-        }
+        .cinema-section.active { opacity: 1; pointer-events: all; }
 
         .title-hb {
-            font-family: 'Cinzel', serif;
-            font-size: 4.5rem;
-            background: linear-gradient(180deg, #FFFFFF 0%, #E50914 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 10px 30px rgba(229, 9, 20, 0.5);
-            letter-spacing: 4px;
-            margin-bottom: 5px;
+            font-family: 'Cinzel', serif; font-size: 4.5rem; font-weight: 900;
+            background: linear-gradient(180deg, #ffffff 30%, #E50914 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            letter-spacing: 6px; text-shadow: 0 10px 40px rgba(229, 9, 20, 0.5);
         }
-
         .name-title {
-            font-family: 'Cinzel', serif;
-            font-size: 3.5rem;
-            color: #ffffff;
-            letter-spacing: 6px;
-            text-transform: uppercase;
-            margin-bottom: 40px;
-            text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+            font-family: 'Cinzel', serif; font-size: 3.8rem; color: #ffffff;
+            letter-spacing: 8px; margin-bottom: 40px; text-shadow: 0 0 30px rgba(255, 255, 255, 0.9), 0 0 10px #E50914;
         }
 
-        /* Cake & Candle */
-        .cake-container {
-            position: relative;
-            cursor: pointer;
-            margin-top: 20px;
-        }
-
+        /* Interactive Cake & Candle */
+        .cake-container { position: relative; cursor: pointer; margin-top: 30px; transition: transform 0.3s; }
+        .cake-container:hover { transform: scale(1.05); }
         .cake {
-            width: 180px;
-            height: 120px;
-            background: #2b0b0e;
-            border-radius: 15px 15px 0 0;
-            position: relative;
-            box-shadow: inset 0 12px 0 #E50914, inset 0 24px 0 #fff;
-            border: 2px solid #333;
+            width: 180px; height: 120px; background: linear-gradient(to bottom, #3b0d11, #1f0507);
+            border-radius: 16px 16px 0 0; box-shadow: inset 0 14px 0 #E50914, inset 0 28px 0 #ffffff, 0 15px 30px rgba(0,0,0,0.8);
+            border: 1px solid #444;
         }
-
-        .candle {
-            width: 16px;
-            height: 50px;
-            background: linear-gradient(to right, #ffffff, #e0e0e0);
-            position: absolute;
-            top: -50px;
-            left: 50%;
-            transform: translateX(-50%);
-            border-radius: 4px;
-        }
-
+        .candle { width: 14px; height: 50px; background: linear-gradient(to right, #ffffff, #dcdcdc); position: absolute; top: -50px; left: 50%; transform: translateX(-50%); border-radius: 4px; }
         .flame {
-            width: 16px;
-            height: 24px;
-            background: #ff9d00;
-            border-radius: 50% 50% 20% 20%;
-            position: absolute;
-            top: -24px;
-            left: 50%;
-            transform: translateX(-50%);
-            box-shadow: 0 0 20px #ff9d00, 0 0 40px #ff0000;
-            animation: flicker 0.1s infinite alternate;
-            transition: opacity 0.5s;
+            width: 16px; height: 26px; background: radial-gradient(ellipse at bottom, #ffff00 0%, #ff5500 100%);
+            border-radius: 50% 50% 20% 20%; position: absolute; top: -26px; left: 50%; transform: translateX(-50%);
+            box-shadow: 0 0 20px #ff9d00, 0 0 40px #ff0000; animation: flick 0.1s infinite alternate; transition: opacity 0.5s;
         }
-
-        @keyframes flicker {
-            0% { transform: translateX(-50%) scale(1); }
-            100% { transform: translateX(-50%) scale(1.1); }
-        }
-
-        .flame.off {
-            opacity: 0;
-            animation: none;
-        }
-
+        @keyframes flick { 0% { transform: translateX(-50%) scale(1); } 100% { transform: translateX(-50%) scale(1.15); } }
+        .flame.off { opacity: 0; animation: none; }
         .smoke {
-            position: absolute;
-            top: -30px;
-            left: 50%;
-            width: 8px;
-            height: 20px;
-            background: rgba(200,200,200,0.5);
-            border-radius: 10px;
-            opacity: 0;
-            pointer-events: none;
+            position: absolute; top: -35px; left: 50%; width: 6px; height: 25px; background: rgba(220,220,220,0.6);
+            border-radius: 10px; opacity: 0; pointer-events: none;
         }
+        .smoke.active { animation: rise 2s forwards; }
+        @keyframes rise { 0% { opacity: 0.8; transform: translateX(-50%) translateY(0) scale(1); } 100% { opacity: 0; transform: translateX(-50%) translateY(-70px) scale(3); } }
 
-        .smoke.active {
-            animation: rise 2s forwards;
-        }
-
-        @keyframes rise {
-            0% { opacity: 0.8; transform: translateX(-50%) translateY(0) scale(1); }
-            100% { opacity: 0; transform: translateX(-50%) translateY(-60px) scale(3); }
-        }
-
-        .wish-text {
-            margin-top: 30px;
-            font-size: 1.1rem;
-            color: #aaa;
-        }
+        .wish-text { margin-top: 35px; font-size: 1.3rem; color: #bbb; font-weight: bold; transition: color 0.5s; }
     </style>
 </head>
 <body>
 
     <div class="intro-overlay" id="introOverlay">
+        <div class="netflix-logo">SPECIAL EDITION</div>
         <button class="netflix-btn" onclick="startExperience()">اضغط للبدء 🎬</button>
     </div>
 
@@ -267,47 +104,11 @@
         <source src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=piano-moment-114876.mp3" type="audio/mpeg">
     </audio>
 
-    <section class="scene" id="scene1">
-        <div class="instructions">اضغط على الورود لتفتحها ✨</div>
-        <div class="garden">
-            <div class="flower-pot" onclick="bloom(this, 1)">
-                <div class="message-box">أنتِ أعظم إنسان عرفته</div>
-                <svg class="flower-svg" viewBox="0 0 100 200">
-                    <path d="M50 200 Q 45 130 50 80" stroke="#2e7d32" stroke-width="5" fill="none"/>
-                    <circle class="petal" cx="50" cy="50" r="25" fill="#E50914"/>
-                    <circle class="petal" cx="30" cy="50" r="18" fill="#ff4d4d"/>
-                    <circle class="petal" cx="70" cy="50" r="18" fill="#ff4d4d"/>
-                    <circle class="petal" cx="50" cy="30" r="18" fill="#ff4d4d"/>
-                    <circle class="petal" cx="50" cy="70" r="18" fill="#ff4d4d"/>
-                    <circle cx="50" cy="50" r="10" fill="#fff"/>
-                </svg>
-            </div>
-            <div class="flower-pot" onclick="bloom(this, 2)">
-                <div class="message-box">وما زلت أعرفه</div>
-                <svg class="flower-svg" viewBox="0 0 100 200">
-                    <path d="M50 200 Q 55 130 50 80" stroke="#2e7d32" stroke-width="5" fill="none"/>
-                    <circle class="petal" cx="50" cy="50" r="25" fill="#ffffff"/>
-                    <circle class="petal" cx="30" cy="50" r="18" fill="#e0e0e0"/>
-                    <circle class="petal" cx="70" cy="50" r="18" fill="#e0e0e0"/>
-                    <circle class="petal" cx="50" cy="30" r="18" fill="#e0e0e0"/>
-                    <circle class="petal" cx="50" cy="70" r="18" fill="#e0e0e0"/>
-                    <circle cx="50" cy="50" r="10" fill="#E50914"/>
-                </svg>
-            </div>
-            <div class="flower-pot" onclick="bloom(this, 3)">
-                <div class="message-box">وسنبقى نعرفه ❤️</div>
-                <svg class="flower-svg" viewBox="0 0 100 200">
-                    <path d="M50 200 Q 45 130 50 80" stroke="#2e7d32" stroke-width="5" fill="none"/>
-                    <circle class="petal" cx="50" cy="50" r="25" fill="#E50914"/>
-                    <circle class="petal" cx="30" cy="50" r="18" fill="#ff4d4d"/>
-                    <circle class="petal" cx="70" cy="50" r="18" fill="#ff4d4d"/>
-                    <circle class="petal" cx="50" cy="30" r="18" fill="#ff4d4d"/>
-                    <circle class="petal" cx="50" cy="70" r="18" fill="#ff4d4d"/>
-                    <circle cx="50" cy="50" r="10" fill="#fff"/>
-                </svg>
-            </div>
-        </div>
-    </section>
+    <div class="canvas-container" id="canvasContainer">
+        <div class="instruction">اضغط على الشاشة لزراعة الورود ✨</div>
+        <div class="message-popup" id="msgPopup"></div>
+        <canvas id="flowerCanvas"></canvas>
+    </div>
 
     <section class="cinema-section" id="scene2">
         <h1 class="title-hb">HAPPY BIRTHDAY</h1>
@@ -324,40 +125,194 @@
     </section>
 
     <script>
-        let bloomedCount = 0;
+        const canvas = document.getElementById('flowerCanvas');
+        const ctx = canvas.getContext('2d');
+        let flowers = [];
+        let particles = [];
+        let flowerCount = 0;
+
+        const messages = [
+            "أنتِ أعظم إنسان عرفته",
+            "وما زلت أعرفه",
+            "وسنبقى نعرفه ❤️"
+        ];
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
 
         function startExperience() {
-            document.getElementById('introOverlay').style.opacity = '0';
-            setTimeout(() => {
-                document.getElementById('introOverlay').style.display = 'none';
-            }, 1500);
+            const overlay = document.getElementById('introOverlay');
+            overlay.style.opacity = '0';
+            setTimeout(() => { overlay.style.display = 'none'; }, 1200);
             document.getElementById('bgMusic').play();
+            createAmbientParticles();
         }
 
-        function bloom(element, index) {
-            if (!element.classList.contains('bloomed')) {
-                element.classList.add('bloomed');
-                bloomedCount++;
+        /* Ambient Glowing Background Particles */
+        function createAmbientParticles() {
+            for (let i = 0; i < 40; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    radius: Math.random() * 2 + 1,
+                    alpha: Math.random() * 0.5 + 0.2,
+                    speedY: Math.random() * 0.5 + 0.1
+                });
+            }
+        }
 
-                if (bloomedCount === 3) {
-                    setTimeout(transitionToCinema, 2000);
+        /* High Quality Curved Flower Algorithm */
+        class RealisticFlower {
+            constructor(x, y) {
+                this.x = x;
+                this.targetY = y;
+                this.currentY = canvas.height;
+                this.stemHeight = 0;
+                this.maxStemHeight = canvas.height - y;
+                this.curveControl = (Math.random() - 0.5) * 60;
+                
+                this.petalScale = 0;
+                this.maxPetalScale = 1;
+                this.petalCount = 6 + Math.floor(Math.random() * 3);
+                this.color = ['#E50914', '#ff3344', '#ffffff', '#ff99a8'][Math.floor(Math.random() * 4)];
+                this.centerColor = '#ffcc00';
+            }
+
+            draw() {
+                // Stem Animation
+                ctx.beginPath();
+                ctx.moveTo(this.x, canvas.height);
+                ctx.quadraticCurveTo(
+                    this.x + this.curveControl, 
+                    canvas.height - (this.stemHeight / 2), 
+                    this.x, 
+                    canvas.height - this.stemHeight
+                );
+                ctx.strokeStyle = '#2d7a32';
+                ctx.lineWidth = 4;
+                ctx.shadowBlur = 5;
+                ctx.shadowColor = 'rgba(0,0,0,0.5)';
+                ctx.stroke();
+                ctx.shadowBlur = 0;
+
+                // Leaves
+                if (this.stemHeight > this.maxStemHeight * 0.4) {
+                    this.drawLeaf(this.x + this.curveControl * 0.3, canvas.height - this.stemHeight * 0.4, -1);
+                }
+                if (this.stemHeight > this.maxStemHeight * 0.7) {
+                    this.drawLeaf(this.x + this.curveControl * 0.6, canvas.height - this.stemHeight * 0.7, 1);
+                }
+
+                // Flower Bloom
+                if (this.stemHeight >= this.maxStemHeight) {
+                    const topY = canvas.height - this.maxStemHeight;
+                    ctx.save();
+                    ctx.translate(this.x, topY);
+                    
+                    for (let i = 0; i < this.petalCount; i++) {
+                        const angle = (i * Math.PI * 2) / this.petalCount;
+                        ctx.save();
+                        ctx.rotate(angle);
+                        ctx.beginPath();
+                        ctx.moveTo(0, 0);
+                        ctx.quadraticCurveTo(15 * this.petalScale, -25 * this.petalScale, 0, -35 * this.petalScale);
+                        ctx.quadraticCurveTo(-15 * this.petalScale, -25 * this.petalScale, 0, 0);
+                        ctx.fillStyle = this.color;
+                        ctx.shadowBlur = 10;
+                        ctx.shadowColor = this.color;
+                        ctx.fill();
+                        ctx.restore();
+                    }
+
+                    // Center Core
+                    ctx.beginPath();
+                    ctx.arc(0, 0, 8 * this.petalScale, 0, Math.PI * 2);
+                    ctx.fillStyle = this.centerColor;
+                    ctx.fill();
+                    ctx.restore();
+                }
+            }
+
+            drawLeaf(x, y, side) {
+                ctx.save();
+                ctx.translate(x, y);
+                ctx.rotate(side * 0.5);
+                ctx.beginPath();
+                ctx.ellipse(side * 12, 0, 12, 5, 0, 0, Math.PI * 2);
+                ctx.fillStyle = '#225925';
+                ctx.fill();
+                ctx.restore();
+            }
+
+            update() {
+                if (this.stemHeight < this.maxStemHeight) {
+                    this.stemHeight += (this.maxStemHeight - this.stemHeight) * 0.08 + 2;
+                } else if (this.petalScale < this.maxPetalScale) {
+                    this.petalScale += 0.04;
                 }
             }
         }
 
+        /* Canvas Click Interaction */
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            flowers.push(new RealisticFlower(x, y));
+
+            const msgPopup = document.getElementById('msgPopup');
+            msgPopup.innerText = messages[flowerCount % messages.length];
+            msgPopup.style.left = `${x}px`;
+            msgPopup.style.top = `${y - 20}px`;
+            msgPopup.style.opacity = '1';
+            msgPopup.style.transform = 'translate(-50%, -100%) scale(1.05)';
+
+            flowerCount++;
+
+            if (flowerCount === 3) {
+                setTimeout(transitionToCinema, 2200);
+            }
+        });
+
+        /* Smooth Transition */
         function transitionToCinema() {
             const scene2 = document.getElementById('scene2');
             scene2.classList.add('active');
             scene2.scrollIntoView({ behavior: 'smooth' });
 
-            // Launch Initial Confetti
-            confetti({
-                particleCount: 120,
-                spread: 80,
-                origin: { y: 0.6 }
-            });
+            confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
         }
 
+        /* Main Render Loop */
+        function render() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Render Ambient Particles
+            particles.forEach(p => {
+                p.y -= p.speedY;
+                if (p.y < 0) p.y = canvas.height;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 255, 255, ${p.alpha})`;
+                ctx.fill();
+            });
+
+            // Render Flowers
+            flowers.forEach(f => {
+                f.update();
+                f.draw();
+            });
+
+            requestAnimationFrame(render);
+        }
+        render();
+
+        /* Candle Extinguish Event */
         function extinguishCandle() {
             const flame = document.getElementById('flame');
             const smoke = document.getElementById('smoke');
@@ -366,29 +321,19 @@
             if (!flame.classList.contains('off')) {
                 flame.classList.add('off');
                 smoke.classList.add('active');
-                wishText.innerHTML = "كل عام وأنتِ بـألف خير يا Layla! 🎉❤️";
+                wishText.innerText = "كل عام وأنتِ بـألف خير وسعادة يا Layla! 🎉❤️";
                 wishText.style.color = "#E50914";
-                wishText.style.fontSize = "1.5rem";
 
-                // Grand Fireworks Confetti
+                // Grand Fireworks Burst
                 var duration = 4 * 1000;
-                var animationEnd = Date.now() + duration;
-                var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+                var end = Date.now() + duration;
 
-                var interval = setInterval(function() {
-                    var timeLeft = animationEnd - Date.now();
-                    if (timeLeft <= 0) {
-                        return clearInterval(interval);
-                    }
-                    var particleCount = 50 * (timeLeft / duration);
-                    confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
-                    confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
-                }, 250);
+                (function frame() {
+                    confetti({ particleCount: 7, angle: 60, spread: 55, origin: { x: 0 } });
+                    confetti({ particleCount: 7, angle: 120, spread: 55, origin: { x: 1 } });
+                    if (Date.now() < end) requestAnimationFrame(frame);
+                }());
             }
-        }
-
-        function randomInRange(min, max) {
-            return Math.random() * (max - min) + min;
         }
     </script>
 </body>
