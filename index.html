@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday Layla</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #0d0d0d;
+            color: #ffffff;
+            font-family: 'Tajawal', sans-serif;
+            overflow-x: hidden;
+            user-select: none;
+        }
+
+        /* Netflix Intro Atmosphere */
+        .intro-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 1.5s ease-out;
+        }
+
+        .netflix-btn {
+            background: #E50914;
+            color: #fff;
+            border: none;
+            padding: 18px 45px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            box-shadow: 0 0 25px rgba(229, 9, 20, 0.6);
+            transition: transform 0.2s, background 0.3s;
+        }
+
+        .netflix-btn:hover {
+            transform: scale(1.05);
+            background: #f40612;
+        }
+
+        /* Section 1: Flowers Scene */
+        .scene {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            background: radial-gradient(circle at center, #1a0507 0%, #050505 100%);
+        }
+
+        .instructions {
+            position: absolute;
+            top: 40px;
+            font-size: 1.2rem;
+            color: #e5e5e5;
+            letter-spacing: 1px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+
+        .garden {
+            display: flex;
+            gap: 40px;
+            margin-top: 50px;
+        }
+
+        .flower-pot {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .message-box {
+            position: absolute;
+            top: -70px;
+            background: rgba(229, 9, 20, 0.9);
+            color: white;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            white-space: nowrap;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            pointer-events: none;
+        }
+
+        .flower-pot.bloomed .message-box {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .flower-svg {
+            width: 90px;
+            height: 180px;
+            transition: transform 0.3s;
+        }
+
+        .flower-pot:hover .flower-svg {
+            transform: scale(1.1);
+        }
+
+        .petal {
+            transform-origin: center;
+            transition: transform 0.8s ease-out;
+            scale: 0;
+        }
+
+        .flower-pot.bloomed .petal {
+            scale: 1;
+        }
+
+        /* Section 2: Cinema Birthday Header */
+        .cinema-section {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #000;
+            position: relative;
+            text-align: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 2s ease-in-out;
+        }
+
+        .cinema-section.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .title-hb {
+            font-family: 'Cinzel', serif;
+            font-size: 4.5rem;
+            background: linear-gradient(180deg, #FFFFFF 0%, #E50914 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 10px 30px rgba(229, 9, 20, 0.5);
+            letter-spacing: 4px;
+            margin-bottom: 5px;
+        }
+
+        .name-title {
+            font-family: 'Cinzel', serif;
+            font-size: 3.5rem;
+            color: #ffffff;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            margin-bottom: 40px;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+        }
+
+        /* Cake & Candle */
+        .cake-container {
+            position: relative;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .cake {
+            width: 180px;
+            height: 120px;
+            background: #2b0b0e;
+            border-radius: 15px 15px 0 0;
+            position: relative;
+            box-shadow: inset 0 12px 0 #E50914, inset 0 24px 0 #fff;
+            border: 2px solid #333;
+        }
+
+        .candle {
+            width: 16px;
+            height: 50px;
+            background: linear-gradient(to right, #ffffff, #e0e0e0);
+            position: absolute;
+            top: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 4px;
+        }
+
+        .flame {
+            width: 16px;
+            height: 24px;
+            background: #ff9d00;
+            border-radius: 50% 50% 20% 20%;
+            position: absolute;
+            top: -24px;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 0 20px #ff9d00, 0 0 40px #ff0000;
+            animation: flicker 0.1s infinite alternate;
+            transition: opacity 0.5s;
+        }
+
+        @keyframes flicker {
+            0% { transform: translateX(-50%) scale(1); }
+            100% { transform: translateX(-50%) scale(1.1); }
+        }
+
+        .flame.off {
+            opacity: 0;
+            animation: none;
+        }
+
+        .smoke {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            width: 8px;
+            height: 20px;
+            background: rgba(200,200,200,0.5);
+            border-radius: 10px;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .smoke.active {
+            animation: rise 2s forwards;
+        }
+
+        @keyframes rise {
+            0% { opacity: 0.8; transform: translateX(-50%) translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateX(-50%) translateY(-60px) scale(3); }
+        }
+
+        .wish-text {
+            margin-top: 30px;
+            font-size: 1.1rem;
+            color: #aaa;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="intro-overlay" id="introOverlay">
+        <button class="netflix-btn" onclick="startExperience()">اضغط للبدء 🎬</button>
+    </div>
+
+    <audio id="bgMusic" loop>
+        <source src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=piano-moment-114876.mp3" type="audio/mpeg">
+    </audio>
+
+    <section class="scene" id="scene1">
+        <div class="instructions">اضغط على الورود لتفتحها ✨</div>
+        <div class="garden">
+            <div class="flower-pot" onclick="bloom(this, 1)">
+                <div class="message-box">أنتِ أعظم إنسان عرفته</div>
+                <svg class="flower-svg" viewBox="0 0 100 200">
+                    <path d="M50 200 Q 45 130 50 80" stroke="#2e7d32" stroke-width="5" fill="none"/>
+                    <circle class="petal" cx="50" cy="50" r="25" fill="#E50914"/>
+                    <circle class="petal" cx="30" cy="50" r="18" fill="#ff4d4d"/>
+                    <circle class="petal" cx="70" cy="50" r="18" fill="#ff4d4d"/>
+                    <circle class="petal" cx="50" cy="30" r="18" fill="#ff4d4d"/>
+                    <circle class="petal" cx="50" cy="70" r="18" fill="#ff4d4d"/>
+                    <circle cx="50" cy="50" r="10" fill="#fff"/>
+                </svg>
+            </div>
+            <div class="flower-pot" onclick="bloom(this, 2)">
+                <div class="message-box">وما زلت أعرفه</div>
+                <svg class="flower-svg" viewBox="0 0 100 200">
+                    <path d="M50 200 Q 55 130 50 80" stroke="#2e7d32" stroke-width="5" fill="none"/>
+                    <circle class="petal" cx="50" cy="50" r="25" fill="#ffffff"/>
+                    <circle class="petal" cx="30" cy="50" r="18" fill="#e0e0e0"/>
+                    <circle class="petal" cx="70" cy="50" r="18" fill="#e0e0e0"/>
+                    <circle class="petal" cx="50" cy="30" r="18" fill="#e0e0e0"/>
+                    <circle class="petal" cx="50" cy="70" r="18" fill="#e0e0e0"/>
+                    <circle cx="50" cy="50" r="10" fill="#E50914"/>
+                </svg>
+            </div>
+            <div class="flower-pot" onclick="bloom(this, 3)">
+                <div class="message-box">وسنبقى نعرفه ❤️</div>
+                <svg class="flower-svg" viewBox="0 0 100 200">
+                    <path d="M50 200 Q 45 130 50 80" stroke="#2e7d32" stroke-width="5" fill="none"/>
+                    <circle class="petal" cx="50" cy="50" r="25" fill="#E50914"/>
+                    <circle class="petal" cx="30" cy="50" r="18" fill="#ff4d4d"/>
+                    <circle class="petal" cx="70" cy="50" r="18" fill="#ff4d4d"/>
+                    <circle class="petal" cx="50" cy="30" r="18" fill="#ff4d4d"/>
+                    <circle class="petal" cx="50" cy="70" r="18" fill="#ff4d4d"/>
+                    <circle cx="50" cy="50" r="10" fill="#fff"/>
+                </svg>
+            </div>
+        </div>
+    </section>
+
+    <section class="cinema-section" id="scene2">
+        <h1 class="title-hb">HAPPY BIRTHDAY</h1>
+        <h2 class="name-title">LAYLA</h2>
+
+        <div class="cake-container" onclick="extinguishCandle()">
+            <div class="candle">
+                <div class="flame" id="flame"></div>
+                <div class="smoke" id="smoke"></div>
+            </div>
+            <div class="cake"></div>
+        </div>
+        <p class="wish-text" id="wishText">اضغطي على الشمعة لإطفائها والتمني ✨</p>
+    </section>
+
+    <script>
+        let bloomedCount = 0;
+
+        function startExperience() {
+            document.getElementById('introOverlay').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('introOverlay').style.display = 'none';
+            }, 1500);
+            document.getElementById('bgMusic').play();
+        }
+
+        function bloom(element, index) {
+            if (!element.classList.contains('bloomed')) {
+                element.classList.add('bloomed');
+                bloomedCount++;
+
+                if (bloomedCount === 3) {
+                    setTimeout(transitionToCinema, 2000);
+                }
+            }
+        }
+
+        function transitionToCinema() {
+            const scene2 = document.getElementById('scene2');
+            scene2.classList.add('active');
+            scene2.scrollIntoView({ behavior: 'smooth' });
+
+            // Launch Initial Confetti
+            confetti({
+                particleCount: 120,
+                spread: 80,
+                origin: { y: 0.6 }
+            });
+        }
+
+        function extinguishCandle() {
+            const flame = document.getElementById('flame');
+            const smoke = document.getElementById('smoke');
+            const wishText = document.getElementById('wishText');
+
+            if (!flame.classList.contains('off')) {
+                flame.classList.add('off');
+                smoke.classList.add('active');
+                wishText.innerHTML = "كل عام وأنتِ بـألف خير يا Layla! 🎉❤️";
+                wishText.style.color = "#E50914";
+                wishText.style.fontSize = "1.5rem";
+
+                // Grand Fireworks Confetti
+                var duration = 4 * 1000;
+                var animationEnd = Date.now() + duration;
+                var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+                var interval = setInterval(function() {
+                    var timeLeft = animationEnd - Date.now();
+                    if (timeLeft <= 0) {
+                        return clearInterval(interval);
+                    }
+                    var particleCount = 50 * (timeLeft / duration);
+                    confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+                    confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+                }, 250);
+            }
+        }
+
+        function randomInRange(min, max) {
+            return Math.random() * (max - min) + min;
+        }
+    </script>
+</body>
+</html>
