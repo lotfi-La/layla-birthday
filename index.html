@@ -1,344 +1,793 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Happy Birthday Layla</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&family=Playfair+Display:ital,wght@1,700;1,900&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        html, body { width: 100%; height: 100%; background: #050505; color: #fff; font-family: 'Cairo', sans-serif; overflow: hidden; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#050505">
+<title>Layla's Birthday Edition</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Playfair+Display:ital,wght@1,600;1,800&family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.4/dist/confetti.browser.min.js"></script>
+<style>
+:root{
+  --bg:#050505;
+  --wine:#5c0f1a;
+  --wine-bright:#8a1a2b;
+  --gold:#c9a45c;
+  --gold-light:#ecd9a8;
+  --cream:#f3ece0;
+  --vh:1vh;
+}
 
-        /* Intro Screen */
-        .intro-overlay {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: radial-gradient(circle, #1a0203 0%, #000 100%);
-            z-index: 999; display: flex; flex-direction: column; justify-content: center; align-items: center;
-            transition: opacity 1s ease, visibility 1s;
-        }
-        .intro-title {
-            font-family: 'Playfair Display', serif; font-size: 2.2rem; color: #fff; font-style: italic;
-            text-shadow: 0 0 15px rgba(229, 9, 20, 0.8); margin-bottom: 30px; letter-spacing: 2px;
-        }
-        .start-btn {
-            background: linear-gradient(135deg, #E50914, #900C3F); color: #fff; border: none;
-            padding: 14px 38px; font-size: 1.1rem; font-weight: 700; border-radius: 30px;
-            box-shadow: 0 4px 20px rgba(229, 9, 20, 0.5); cursor: pointer;
-        }
+*{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 
-        /* Flower Scene */
-        .scene { position: relative; width: 100vw; height: 100vh; overflow: hidden; }
-        canvas { display: block; width: 100%; height: 100%; }
+html,body{
+  margin:0; padding:0;
+  width:100%; height:100%;
+  overflow:hidden;
+  overscroll-behavior:none;
+  background:var(--bg);
+  color:var(--cream);
+  font-family:'Cairo',sans-serif;
+}
 
-        .instruction {
-            position: absolute; top: 6%; width: 100%; text-align: center;
-            font-size: 1.1rem; color: rgba(255, 255, 255, 0.85); pointer-events: none;
-            text-shadow: 0 2px 8px rgba(0,0,0,0.9); z-index: 10;
-        }
+body{
+  position:fixed;
+  inset:0;
+  height:100vh;
+  height:calc(var(--vh,1vh) * 100);
+  height:100dvh;
+  background:
+    radial-gradient(ellipse 60% 40% at 18% 15%, rgba(138,26,43,.30), transparent 60%),
+    radial-gradient(ellipse 50% 35% at 85% 20%, rgba(201,164,92,.14), transparent 60%),
+    radial-gradient(ellipse 70% 45% at 50% 100%, rgba(92,15,26,.35), transparent 65%),
+    var(--bg);
+}
 
-        /* Typewriter Text */
-        .typewriter-text {
-            position: absolute; color: #fff; font-size: 1.15rem; font-weight: 700;
-            text-shadow: 0 0 12px rgba(229, 9, 20, 0.9), 0 2px 5px #000;
-            pointer-events: none; white-space: nowrap; z-index: 20;
-            border-left: 2px solid #E50914; padding-left: 5px;
-            animation: blink 0.7s infinite alternate;
-        }
-        @keyframes blink { 0% { border-color: transparent; } 100% { border-color: #E50914; } }
+button,input{ font-family:inherit; }
+button{ -webkit-appearance:none; appearance:none; }
 
-        /* Cinema Section (Slide Up) */
-        .cinema-section {
-            position: absolute; top: 100vh; left: 0; width: 100vw; height: 100vh;
-            background: radial-gradient(circle at center, #140204 0%, #000 100%);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            text-align: center; z-index: 30; transition: transform 1.2s cubic-bezier(0.77, 0, 0.175, 1);
-            padding: 20px;
-        }
-        .cinema-section.active { transform: translateY(-100vh); }
+/* ================= Stage viewport / track ================= */
+#stagesViewport{
+  position:relative;
+  width:100%;
+  height:100vh;
+  height:calc(var(--vh,1vh) * 100);
+  height:100dvh;
+  overflow:hidden;
+}
+#stagesTrack{
+  display:flex;
+  flex-direction:column;
+  width:100%;
+  transform:translateY(0);
+  transition:transform 1.15s cubic-bezier(.65,0,.35,1);
+}
+#stagesTrack.to-stage3{
+  transform:translateY(-100vh);
+  transform:translateY(calc(var(--vh,1vh) * -100));
+  transform:translateY(-100dvh);
+}
+.stage{
+  position:relative;
+  width:100%;
+  height:100vh;
+  height:calc(var(--vh,1vh) * 100);
+  height:100dvh;
+  flex:0 0 auto;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+}
 
-        .title-hb {
-            font-family: 'Playfair Display', serif; font-size: 2.8rem; font-style: italic;
-            background: linear-gradient(180deg, #fff 40%, #E50914 100%);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        }
-        .name-title {
-            font-family: 'Playfair Display', serif; font-size: 2.4rem; color: #fff;
-            letter-spacing: 4px; margin-bottom: 25px; text-shadow: 0 0 20px #E50914;
-        }
+/* ================= Intro ================= */
+#introScreen{
+  position:fixed; inset:0; z-index:200;
+  display:flex; align-items:center; justify-content:center;
+  padding:24px;
+  padding-top:max(24px, env(safe-area-inset-top));
+  padding-bottom:max(24px, env(safe-area-inset-bottom));
+  transition:opacity .9s ease, transform .9s ease;
+}
+#introScreen.intro-hide{ opacity:0; transform:scale(1.04); pointer-events:none; }
 
-        /* Wish Form Stage */
-        .wish-box {
-            display: flex; flex-direction: column; align-items: center; gap: 12px; width: 85%; max-width: 320px;
-        }
-        .wish-input {
-            width: 100%; padding: 12px 18px; border-radius: 25px; border: 1px solid rgba(229, 9, 20, 0.6);
-            background: rgba(255, 255, 255, 0.07); color: #fff; text-align: center; font-size: 1rem;
-            outline: none; font-family: 'Cairo', sans-serif;
-        }
-        .wish-btn {
-            background: #E50914; color: #fff; border: none; padding: 10px 25px; border-radius: 20px;
-            font-weight: 700; cursor: pointer; font-size: 0.95rem; box-shadow: 0 4px 15px rgba(229,9,20,0.4);
-        }
+.intro-card{
+  position:relative;
+  text-align:center;
+  padding:46px 30px;
+  max-width:380px;
+  width:100%;
+  border:1px solid rgba(201,164,92,.32);
+  background:linear-gradient(165deg, rgba(30,10,12,.55), rgba(5,5,5,.9));
+  box-shadow:0 0 70px rgba(201,164,92,.07), inset 0 0 50px rgba(92,15,26,.15);
+}
+.intro-card::before,.intro-card::after{
+  content:''; position:absolute; width:22px; height:22px;
+  border:1px solid var(--gold); opacity:.55;
+}
+.intro-card::before{ top:-1px; left:-1px; border-right:none; border-bottom:none; }
+.intro-card::after{ bottom:-1px; right:-1px; border-left:none; border-top:none; }
 
-        /* 3D Rotating Cake Stage */
-        .cake-stage {
-            display: none; flex-direction: column; align-items: center;
-            animation: cake3D 2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-        }
-        @keyframes cake3D {
-            0% { transform: scale(0.2) rotateY(180deg) translateY(200px); opacity: 0; }
-            100% { transform: scale(1) rotateY(0deg) translateY(0); opacity: 1; }
-        }
+.intro-title{
+  font-family:'Playfair Display', serif;
+  font-style:italic;
+  font-weight:700;
+  font-size:1.7rem;
+  line-height:1.4;
+  margin:0 0 36px;
+  background:linear-gradient(180deg, var(--cream) 15%, var(--gold-light) 70%, var(--gold) 100%);
+  -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+}
 
-        .cake-svg { width: 220px; height: 180px; cursor: pointer; }
-        .flame { animation: flicker 0.15s infinite alternate; transform-origin: center bottom; }
-        @keyframes flicker { 0% { transform: scale(1); } 100% { transform: scale(1.15) rotate(2deg); } }
+.start-btn{
+  font-size:.98rem;
+  padding:15px 30px;
+  border:1px solid var(--gold);
+  background:linear-gradient(135deg, rgba(201,164,92,.16), rgba(201,164,92,.04));
+  color:var(--gold-light);
+  cursor:pointer;
+  letter-spacing:.02em;
+  touch-action:manipulation;
+  transition:transform .25s ease, box-shadow .25s ease, background .25s ease;
+  display:inline-flex;
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:center;
+  gap:9px;
+}
+.start-btn .divider{ opacity:.5; }
+.start-btn:active{
+  transform:scale(.96);
+  box-shadow:0 0 26px rgba(201,164,92,.4);
+  background:linear-gradient(135deg, rgba(201,164,92,.28), rgba(201,164,92,.08));
+}
+.start-btn:focus-visible, .wish-btn:focus-visible, .wish-input:focus-visible{
+  outline:2px solid var(--gold-light); outline-offset:3px;
+}
 
-        .blow-instruction { margin-top: 15px; font-size: 1.1rem; color: #e5e5e5; font-weight: 700; }
-    </style>
+/* ================= Stage 2: garden ================= */
+.instruction-text{
+  position:absolute;
+  top:9%;
+  top:max(9%, calc(env(safe-area-inset-top) + 20px));
+  left:0; right:0;
+  text-align:center;
+  font-size:1.05rem;
+  color:rgba(243,236,224,.88);
+  text-shadow:0 2px 14px rgba(0,0,0,.9);
+  z-index:5;
+  padding:0 24px;
+  pointer-events:none;
+}
+
+canvas#flowerCanvas{ position:absolute; inset:0; width:100%; height:100%; display:block; touch-action:manipulation; }
+#gardenLayer{ position:absolute; inset:0; pointer-events:none; z-index:6; }
+
+.tap-text{
+  position:absolute;
+  max-width:min(78vw, 320px);
+  text-align:center;
+  font-weight:600;
+  font-size:1.05rem;
+  line-height:1.5;
+  color:var(--gold-light);
+  text-shadow:0 2px 16px rgba(0,0,0,.95);
+  pointer-events:none;
+  transform:translate(-50%,-100%);
+}
+
+/* ================= Stage 3 ================= */
+#stage3{ padding:0 20px; }
+.titles-block{ text-align:center; margin-bottom:9vh; }
+.title-happy{
+  font-family:'Cinzel', serif;
+  font-weight:700;
+  font-size:clamp(1.6rem, 7.5vw, 2.4rem);
+  letter-spacing:.15em;
+  color:var(--cream);
+  margin:0 0 8px;
+  text-shadow:0 0 30px rgba(201,164,92,.35);
+}
+.title-name{
+  font-family:'Playfair Display', serif;
+  font-style:italic;
+  font-weight:800;
+  font-size:clamp(2.6rem, 14vw, 4.2rem);
+  margin:0;
+  background:linear-gradient(180deg, var(--gold-light) 25%, var(--wine-bright) 135%);
+  -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 4px 24px rgba(92,15,26,.5));
+}
+
+.substage{ display:flex; flex-direction:column; align-items:center; width:100%; max-width:340px; }
+
+#wishStage{ transition:opacity .5s ease, transform .5s ease; }
+#wishStage.substage-hide{ opacity:0; transform:translateY(-14px) scale(1.02); pointer-events:none; }
+
+.wish-form{ display:flex; flex-direction:column; align-items:center; gap:16px; width:100%; }
+.wish-input{
+  width:100%;
+  padding:14px 18px;
+  border:none;
+  border-bottom:2px solid var(--gold);
+  background:rgba(255,255,255,.04);
+  color:var(--cream);
+  text-align:center;
+  font-size:1rem;
+  outline:none;
+  transition:border-color .25s ease, background .25s ease;
+}
+.wish-input::placeholder{ color:rgba(243,236,224,.4); }
+.wish-input:focus{ border-color:var(--gold-light); background:rgba(201,164,92,.08); }
+
+.wish-btn{
+  background:linear-gradient(135deg, var(--wine), var(--wine-bright));
+  color:var(--gold-light);
+  border:1px solid rgba(201,164,92,.5);
+  padding:12px 30px;
+  font-weight:700;
+  font-size:.95rem;
+  cursor:pointer;
+  touch-action:manipulation;
+  box-shadow:0 6px 24px rgba(92,15,26,.4);
+  transition:transform .2s ease, box-shadow .2s ease;
+}
+.wish-btn:active{ transform:scale(.96); }
+
+#cakeStage{ display:none; opacity:0; transition:opacity .5s ease; touch-action:manipulation; }
+#cakeStage.substage-show{ opacity:1; }
+
+.cake-3d-wrapper{ perspective:1000px; }
+.cake-3d-inner{
+  width:min(66vw, 260px);
+  transform-style:preserve-3d;
+  transform:rotateY(-70deg) translateZ(-260px) scale(.5);
+  opacity:0;
+  transition:transform 1.15s cubic-bezier(.16,.84,.44,1), opacity 1.15s ease;
+}
+.cake-3d-inner.cake-in{ transform:rotateY(0) translateZ(0) scale(1); opacity:1; }
+.cake-svg{ width:100%; height:auto; display:block; }
+
+.flame{
+  transform-box:fill-box;
+  transform-origin:50% 100%;
+  animation:flicker 1.7s ease-in-out infinite;
+}
+@keyframes flicker{
+  0%,100%{ transform:scale(1,1) rotate(0deg); }
+  30%{ transform:scale(.9,1.1) rotate(-4deg); }
+  60%{ transform:scale(1.08,.92) rotate(3deg); }
+  80%{ transform:scale(.95,1.05) rotate(-2deg); }
+}
+.flame.out{
+  animation:none;
+  opacity:0;
+  transform:scale(.15,.15) translateY(3px);
+  transition:opacity .35s ease, transform .35s ease;
+}
+
+.cake-instruction{
+  font-size:1.05rem;
+  color:rgba(243,236,224,.9);
+  text-shadow:0 2px 12px rgba(0,0,0,.9);
+  margin-top:22px;
+  text-align:center;
+  min-height:1.6em;
+  opacity:1;
+  transition:opacity .35s ease, color .4s ease;
+}
+.cake-instruction.lit{ color:var(--gold-light); }
+
+.smoke-particle{
+  position:fixed;
+  width:9px; height:9px;
+  border-radius:50%;
+  background:radial-gradient(circle, rgba(210,205,198,.6), rgba(210,205,198,0) 70%);
+  filter:blur(1.5px);
+  pointer-events:none;
+  opacity:.85;
+  transform:translate(-50%,-50%) scale(.6);
+  z-index:50;
+}
+.smoke-particle.rise{
+  transition:transform 1.5s ease-out, opacity 1.5s ease-out;
+  transform:translate(calc(-50% + var(--sx,0px)), -120px) scale(2);
+  opacity:0;
+}
+
+@media (prefers-reduced-motion: reduce){
+  .flame{ animation:none; }
+  #stagesTrack, #introScreen, #wishStage, #cakeStage, .cake-3d-inner, .smoke-particle{ transition-duration:.05s !important; }
+}
+
+@media (min-width:640px){
+  .intro-card{ padding:56px 46px; }
+}
+</style>
 </head>
 <body>
 
-    <div class="intro-overlay" id="introOverlay">
-        <div class="intro-title">Layla's Birthday</div>
-        <button class="start-btn" onclick="startExperience()">اضغط للبدء ✨</button>
-    </div>
+<div class="intro-card-wrap" id="introScreen">
+  <div class="intro-card">
+    <h1 class="intro-title" dir="ltr">Layla's Birthday<br>Edition</h1>
+    <button type="button" class="start-btn" id="startBtn">
+      <span dir="ltr">Start Experience</span><span class="divider">/</span><span dir="rtl">اضغط للبدء</span>
+    </button>
+  </div>
+</div>
 
-    <audio id="bgMusic" loop preload="auto">
-        <source src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=piano-moment-114876.mp3" type="audio/mpeg">
-    </audio>
+<audio id="bgMusic" loop preload="auto">
+  <source src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=piano-moment-114876.mp3" type="audio/mpeg">
+</audio>
 
-    <div class="scene">
-        <div class="instruction">المسي الشاشة لزراعة الورود 🌸</div>
-        <canvas id="flowerCanvas"></canvas>
-    </div>
+<div id="stagesViewport">
+  <div id="stagesTrack">
 
-    <section class="cinema-section" id="scene2">
-        <h1 class="title-hb">HAPPY BIRTHDAY</h1>
-        <h2 class="name-title">LAYLA</h2>
-
-        <form class="wish-box" id="wishForm" onsubmit="submitWish(event)">
-            <input type="text" name="wish" class="wish-input" id="wishInput" placeholder="اكتبي أمنيتك هنا..." required autocomplete="off">
-            <button type="submit" class="wish-btn">تأكيد الأمنية ✨</button>
-        </form>
-
-        <div class="cake-stage" id="cakeStage" onclick="extinguishCandles()">
-            <svg class="cake-svg" viewBox="0 0 200 160">
-                <ellipse cx="100" cy="145" rx="85" ry="12" fill="#222" stroke="#444" stroke-width="2"/>
-                <path d="M 30 110 Q 100 125 170 110 L 170 140 Q 100 155 30 140 Z" fill="#2a080c"/>
-                <path d="M 30 110 Q 100 125 170 110 L 170 120 Q 100 135 30 120 Z" fill="#E50914"/>
-                <path d="M 45 75 Q 100 90 155 75 L 155 110 Q 100 125 45 110 Z" fill="#3d0c12"/>
-                <path d="M 45 75 Q 100 90 155 75 L 155 83 Q 100 98 45 83 Z" fill="#fff"/>
-                
-                <rect x="55" y="45" width="6" height="30" fill="#fff" rx="2"/>
-                <circle class="flame flame-item" cx="58" cy="40" r="5" fill="#ff9d00"/>
-
-                <rect x="78" y="40" width="6" height="35" fill="#E50914" rx="2"/>
-                <circle class="flame flame-item" cx="81" cy="35" r="5" fill="#ff9d00"/>
-
-                <rect x="97" y="35" width="6" height="40" fill="#fff" rx="2"/>
-                <circle class="flame flame-item" cx="100" cy="30" r="6" fill="#ff9d00"/>
-
-                <rect x="116" y="40" width="6" height="35" fill="#E50914" rx="2"/>
-                <circle class="flame flame-item" cx="119" cy="35" r="5" fill="#ff9d00"/>
-
-                <rect x="138" y="45" width="6" height="30" fill="#fff" rx="2"/>
-                <circle class="flame flame-item" cx="141" cy="40" r="5" fill="#ff9d00"/>
-            </svg>
-            <div class="blow-instruction" id="blowText">انفخي لتنطفأ الشموع 🎙️✨</div>
-        </div>
+    <section class="stage" id="stage2">
+      <p class="instruction-text">المسي الشاشة لزراعة الورود 🌸</p>
+      <canvas id="flowerCanvas"></canvas>
+      <div id="gardenLayer"></div>
     </section>
 
-    <script>
-        const canvas = document.getElementById('flowerCanvas');
-        const ctx = canvas.getContext('2d');
-        let flowers = [];
-        let flowerCount = 0;
-        let activeText = null;
+    <section class="stage" id="stage3">
+      <div class="titles-block">
+        <h2 class="title-happy" dir="ltr">HAPPY BIRTHDAY</h2>
+        <h1 class="title-name" dir="ltr">LAYLA</h1>
+      </div>
 
-        const messages = [
-            "أنتِ أعظم إنسان عرفته",
-            "وما زلت أعرفه",
-            "وسنبقى نعرفه ❤️"
-        ];
+      <div class="substage" id="wishStage">
+        <form class="wish-form" id="wishForm">
+          <input type="text" id="wishInput" class="wish-input" placeholder="اكتبي أمنيتك هنا..." aria-label="اكتبي أمنيتك هنا" autocomplete="off">
+          <button type="submit" class="wish-btn">تأكيد الأمنية ✨</button>
+        </form>
+      </div>
 
-        function resize() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        window.addEventListener('resize', resize);
-        resize();
+      <div class="substage" id="cakeStage">
+        <div class="cake-3d-wrapper">
+          <div class="cake-3d-inner" id="cakeInner">
+            <svg class="cake-svg" viewBox="0 0 200 170" role="img" aria-label="Birthday cake">
+              <defs>
+                <linearGradient id="tierBase" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#7a1420"/>
+                  <stop offset="100%" stop-color="#4a0c14"/>
+                </linearGradient>
+                <linearGradient id="tierTop" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#f3ece0"/>
+                  <stop offset="100%" stop-color="#d8cbb0"/>
+                </linearGradient>
+                <radialGradient id="flameGrad" cx="50%" cy="65%" r="70%">
+                  <stop offset="0%" stop-color="#fff3b0"/>
+                  <stop offset="45%" stop-color="#e8a23a"/>
+                  <stop offset="100%" stop-color="#a83a12"/>
+                </radialGradient>
+              </defs>
 
-        function startExperience() {
-            document.getElementById('introOverlay').style.opacity = '0';
-            setTimeout(() => { document.getElementById('introOverlay').style.display = 'none'; }, 1000);
-            document.getElementById('bgMusic').play().catch(()=>{});
-            initMicBlow();
-        }
+              <ellipse cx="100" cy="152" rx="82" ry="10" fill="#000" opacity=".4"/>
 
-        class MobileFlower {
-            constructor(x, y) {
-                this.x = x;
-                const minY = canvas.height * 0.3;
-                const maxY = canvas.height * 0.75;
-                this.targetY = Math.max(minY, Math.min(y, maxY));
-                this.stemHeight = 0;
-                this.maxStemHeight = canvas.height - this.targetY;
-                this.petalScale = 0;
-                this.color = ['#E50914', '#ff4d4d', '#ffffff', '#ff99a8'][Math.floor(Math.random() * 4)];
-            }
+              <path d="M28 112 Q100 128 172 112 L172 142 Q100 158 28 142 Z" fill="url(#tierBase)"/>
+              <path d="M28 112 Q100 128 172 112" fill="none" stroke="#c9a45c" stroke-width="1.4" opacity=".8"/>
+              <path d="M30 133 Q100 147 170 133" fill="none" stroke="#c9a45c" stroke-width=".8" opacity=".45"/>
 
-            draw() {
-                ctx.beginPath();
-                ctx.moveTo(this.x, canvas.height);
-                ctx.quadraticCurveTo(this.x - 12, canvas.height - this.stemHeight / 2, this.x, canvas.height - this.stemHeight);
-                ctx.strokeStyle = '#2d7a32';
-                ctx.lineWidth = 3.5;
-                ctx.stroke();
+              <path d="M46 78 Q100 92 154 78 L154 112 Q100 128 46 112 Z" fill="url(#tierTop)"/>
+              <path d="M46 78 Q100 92 154 78" fill="none" stroke="#c9a45c" stroke-width="1.4" opacity=".9"/>
 
-                if (this.stemHeight >= this.maxStemHeight) {
-                    const topY = canvas.height - this.maxStemHeight;
-                    ctx.save();
-                    ctx.translate(this.x, topY);
-                    
-                    for (let i = 0; i < 5; i++) {
-                        const angle = (i * Math.PI * 2) / 5;
-                        ctx.save();
-                        ctx.rotate(angle);
-                        ctx.beginPath();
-                        ctx.arc(0, -16 * this.petalScale, 11 * this.petalScale, 0, Math.PI * 2);
-                        ctx.fillStyle = this.color;
-                        ctx.fill();
-                        ctx.restore();
-                    }
-                    ctx.beginPath();
-                    ctx.arc(0, 0, 6 * this.petalScale, 0, Math.PI * 2);
-                    ctx.fillStyle = '#ffcc00';
-                    ctx.fill();
-                    ctx.restore();
-                }
-            }
+              <g fill="#c9a45c" opacity=".85">
+                <circle cx="40" cy="127" r="1.6"/><circle cx="60" cy="134" r="1.6"/><circle cx="80" cy="138" r="1.6"/>
+                <circle cx="100" cy="140" r="1.6"/><circle cx="120" cy="138" r="1.6"/><circle cx="140" cy="134" r="1.6"/><circle cx="160" cy="127" r="1.6"/>
+              </g>
 
-            update() {
-                if (this.stemHeight < this.maxStemHeight) {
-                    this.stemHeight += (this.maxStemHeight - this.stemHeight) * 0.12 + 3;
-                } else if (this.petalScale < 1) {
-                    this.petalScale += 0.06;
-                }
-            }
-        }
+              <rect x="58" y="48" width="4.5" height="30" rx="2" fill="#f3ece0"/>
+              <line x1="60.25" y1="48" x2="60.25" y2="43" stroke="#3a2a1a" stroke-width="1.2"/>
+              <path class="flame" style="animation-delay:0s" d="M60.25 30 C55 36 56 44 60.25 44 C64.5 44 65.5 36 60.25 30 Z" fill="url(#flameGrad)"/>
 
-        function typeWriter(text, x, y) {
-            if (activeText) activeText.remove();
+              <rect x="79" y="42" width="4.5" height="36" rx="2" fill="#c9a45c"/>
+              <line x1="81.25" y1="42" x2="81.25" y2="37" stroke="#3a2a1a" stroke-width="1.2"/>
+              <path class="flame" style="animation-delay:.25s" d="M81.25 24 C76 30 77 38 81.25 38 C85.5 38 86.5 30 81.25 24 Z" fill="url(#flameGrad)"/>
 
-            const el = document.createElement('div');
-            el.className = 'typewriter-text';
-            const posX = Math.min(Math.max(x, 110), canvas.width - 110);
-            el.style.left = `${posX}px`;
-            el.style.top = `${y - 45}px`;
-            el.style.transform = 'translateX(-50%)';
-            document.body.appendChild(el);
-            activeText = el;
+              <rect x="98" y="37" width="4.5" height="41" rx="2" fill="#f3ece0"/>
+              <line x1="100.25" y1="37" x2="100.25" y2="32" stroke="#3a2a1a" stroke-width="1.2"/>
+              <path class="flame" style="animation-delay:.5s" d="M100.25 18 C94.5 25 95.5 34 100.25 34 C105 34 106 25 100.25 18 Z" fill="url(#flameGrad)"/>
 
-            let i = 0;
-            function type() {
-                if (i < text.length) {
-                    el.innerText += text.charAt(i);
-                    i++;
-                    setTimeout(type, 70);
-                }
-            }
-            type();
-        }
+              <rect x="117" y="42" width="4.5" height="36" rx="2" fill="#c9a45c"/>
+              <line x1="119.25" y1="42" x2="119.25" y2="37" stroke="#3a2a1a" stroke-width="1.2"/>
+              <path class="flame" style="animation-delay:.75s" d="M119.25 24 C114 30 115 38 119.25 38 C123.5 38 124.5 30 119.25 24 Z" fill="url(#flameGrad)"/>
 
-        canvas.addEventListener('click', (e) => {
-            const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
+              <rect x="138" y="48" width="4.5" height="30" rx="2" fill="#f3ece0"/>
+              <line x1="140.25" y1="48" x2="140.25" y2="43" stroke="#3a2a1a" stroke-width="1.2"/>
+              <path class="flame" style="animation-delay:1s" d="M140.25 30 C135 36 136 44 140.25 44 C144.5 44 145.5 36 140.25 30 Z" fill="url(#flameGrad)"/>
+            </svg>
+          </div>
+        </div>
+        <p class="cake-instruction" id="cakeInstruction">انفخي لتنطفأ الشموع 🎙️✨</p>
+      </div>
+    </section>
 
-            flowers.push(new MobileFlower(x, y));
-            typeWriter(messages[flowerCount % messages.length], x, y);
-            flowerCount++;
+  </div>
+</div>
 
-            if (flowerCount === 3) {
-                setTimeout(() => {
-                    if (activeText) activeText.remove();
-                    document.getElementById('scene2').classList.add('active');
-                }, 2400);
-            }
-        });
+<script id="mainScript">
+(function(){
+'use strict';
 
-        function render() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            flowers.forEach(f => { f.update(); f.draw(); });
-            requestAnimationFrame(render);
-        }
-        render();
+/* ---------- iOS Safari viewport-height fix ---------- */
+function setVH(){
+  document.documentElement.style.setProperty('--vh', (window.innerHeight * 0.01) + 'px');
+}
+setVH();
+window.addEventListener('resize', setVH);
+window.addEventListener('orientationchange', setVH);
+if(window.visualViewport){
+  window.visualViewport.addEventListener('resize', setVH);
+}
 
-        /* Submit Wish to Email (Formspree) */
-        function submitWish(event) {
-            event.preventDefault();
-            const wishInput = document.getElementById('wishInput').value;
+var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-            // Formspree API Request
-            fetch('https://formspree.io/f/YOUR_FORMSPREE_ID', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ LaylaWish: wishInput })
-            }).catch(() => {});
+/* ---------- element refs ---------- */
+var introScreen = document.getElementById('introScreen');
+var startBtn = document.getElementById('startBtn');
+var bgMusic = document.getElementById('bgMusic');
+var stagesTrack = document.getElementById('stagesTrack');
+var stage2 = document.getElementById('stage2');
+var canvas = document.getElementById('flowerCanvas');
+var ctx = canvas.getContext('2d');
+var gardenLayer = document.getElementById('gardenLayer');
+var wishStage = document.getElementById('wishStage');
+var wishForm = document.getElementById('wishForm');
+var wishInput = document.getElementById('wishInput');
+var cakeStage = document.getElementById('cakeStage');
+var cakeInner = document.getElementById('cakeInner');
+var cakeInstruction = document.getElementById('cakeInstruction');
 
-            document.getElementById('wishForm').style.display = 'none';
-            document.getElementById('cakeStage').style.display = 'flex';
-        }
+/* ================= AUDIO ================= */
+var audioCtx = null, masterGain = null, ambientStarted = false, chordStep = 0;
 
-        /* Extinguish Candles & Fireworks */
-        function extinguishCandles() {
-            const flames = document.querySelectorAll('.flame-item');
-            flames.forEach(f => f.style.display = 'none');
+function ensureAudioContext(){
+  if(!audioCtx){
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    masterGain = audioCtx.createGain();
+    masterGain.gain.value = 1;
+    masterGain.connect(audioCtx.destination);
+  }
+  if(audioCtx.state === 'suspended'){ audioCtx.resume(); }
+  return audioCtx;
+}
 
-            document.getElementById('blowText').innerText = "كل عام وأنتِ بخير وسعادة يا Layla! 🎉❤️";
-            document.getElementById('blowText').style.color = "#E50914";
+function playPadNote(freq, startTime, duration){
+  var osc = audioCtx.createOscillator();
+  osc.type = 'sine';
+  osc.frequency.value = freq;
+  var shimmer = audioCtx.createOscillator();
+  shimmer.type = 'triangle';
+  shimmer.frequency.value = freq * 2;
+  var shimmerGain = audioCtx.createGain();
+  shimmerGain.gain.value = 0.035;
+  var g = audioCtx.createGain();
+  g.gain.setValueAtTime(0.0001, startTime);
+  g.gain.exponentialRampToValueAtTime(0.11, startTime + 1.4);
+  g.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+  var filter = audioCtx.createBiquadFilter();
+  filter.type = 'lowpass';
+  filter.frequency.value = 1100;
+  osc.connect(g);
+  shimmer.connect(shimmerGain); shimmerGain.connect(g);
+  g.connect(filter); filter.connect(masterGain);
+  osc.start(startTime); osc.stop(startTime + duration + 0.2);
+  shimmer.start(startTime); shimmer.stop(startTime + duration + 0.2);
+}
 
-            var duration = 4 * 1000;
-            var end = Date.now() + duration;
+var ambientChords = [
+  [220.00, 261.63, 329.63, 392.00],
+  [174.61, 220.00, 261.63, 349.23],
+  [261.63, 329.63, 392.00, 493.88],
+  [164.81, 196.00, 246.94, 329.63]
+];
+function scheduleAmbient(){
+  var now = audioCtx.currentTime;
+  var chord = ambientChords[chordStep % ambientChords.length];
+  chord.forEach(function(freq, i){ playPadNote(freq, now + i * 0.18, 4.6); });
+  chordStep++;
+  setTimeout(scheduleAmbient, 4200);
+}
+function startGeneratedAmbient(){
+  if(ambientStarted) return;
+  ambientStarted = true;
+  ensureAudioContext();
+  scheduleAmbient();
+}
 
-            (function frame() {
-                confetti({ particleCount: 8, angle: 60, spread: 60, origin: { x: 0, y: 0.7 } });
-                confetti({ particleCount: 8, angle: 120, spread: 60, origin: { x: 1, y: 0.7 } });
-                if (Date.now() < end) requestAnimationFrame(frame);
-            }());
-        }
+function unlockAudio(){
+  ensureAudioContext();
+  var resolved = false;
+  function useFallback(){ if(!resolved){ resolved = true; startGeneratedAmbient(); } }
+  bgMusic.addEventListener('playing', function(){ resolved = true; }, { once:true });
+  bgMusic.addEventListener('error', useFallback, { once:true });
+  try{
+    var p = bgMusic.play();
+    if(p && p.catch) p.catch(useFallback);
+  }catch(e){ useFallback(); }
+  setTimeout(function(){ if(!resolved) useFallback(); }, 1500);
+}
 
-        /* Microphone Audio Detector */
-        function initMicBlow() {
-            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
-                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                    const analyser = audioContext.createAnalyser();
-                    const microphone = audioContext.createMediaStreamSource(stream);
-                    microphone.connect(analyser);
-                    analyser.fftSize = 256;
-                    const bufferLength = analyser.frequencyBinCount;
-                    const dataArray = new Uint8Array(bufferLength);
+/* ================= STAGE 1 -> 2 ================= */
+startBtn.addEventListener('click', function(){
+  unlockAudio();
+  introScreen.classList.add('intro-hide');
+  setTimeout(function(){ introScreen.style.display = 'none'; }, 900);
+}, { once:true });
 
-                    function checkBlow() {
-                        analyser.getByteFrequencyData(dataArray);
-                        let sum = 0;
-                        for (let i = 0; i < bufferLength; i++) sum += dataArray[i];
-                        let average = sum / bufferLength;
+/* ================= STAGE 2: FLOWER GARDEN ================= */
+function resizeCanvas(){
+  var dpr = Math.min(window.devicePixelRatio || 1, 2);
+  canvas.width = window.innerWidth * dpr;
+  canvas.height = window.innerHeight * dpr;
+  canvas.style.width = window.innerWidth + 'px';
+  canvas.style.height = window.innerHeight + 'px';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
 
-                        if (average > 42) {
-                            extinguishCandles();
-                            stream.getTracks().forEach(track => track.stop());
-                        } else {
-                            requestAnimationFrame(checkBlow);
-                        }
-                    }
-                    checkBlow();
-                }).catch(() => {});
-            }
-        }
-    </script>
+var phrases = ['أنتِ أعظم إنسان عرفته', 'وما زلت أعرفه', 'وسنبقى نعرفه ❤️'];
+var tapCount = 0, gardenLocked = false, activeTypeInterval = null, activeTypeEl = null;
+var flowers = [];
+var palette = ['#8a1a2b', '#c9a45c', '#f3ece0', '#e0b978'];
+
+function clamp(v, min, max){ return Math.min(Math.max(v, min), max); }
+function easeOutCubic(t){ return 1 - Math.pow(1 - t, 3); }
+function easeOutBack(t){ var c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2); }
+
+function Particle(x, y){
+  this.x = x; this.y = y;
+  var angle = Math.random() * Math.PI * 2;
+  var dist = 18 + Math.random() * 26;
+  this.vx = Math.cos(angle) * dist; this.vy = Math.sin(angle) * dist;
+  this.life = 0; this.maxLife = 60 + Math.random() * 30;
+  this.r = 1.2 + Math.random() * 1.8;
+}
+Particle.prototype.update = function(){ this.life++; };
+Object.defineProperty(Particle.prototype, 'done', { get: function(){ return this.life >= this.maxLife; } });
+Particle.prototype.draw = function(){
+  var t = this.life / this.maxLife;
+  var ex = this.x + this.vx * t, ey = this.y + this.vy * t;
+  ctx.save();
+  ctx.globalAlpha = Math.max(0, 1 - t);
+  ctx.shadowColor = 'rgba(236,217,168,.9)';
+  ctx.shadowBlur = 8;
+  ctx.beginPath();
+  ctx.arc(ex, ey, this.r, 0, Math.PI * 2);
+  ctx.fillStyle = '#f0dca0';
+  ctx.fill();
+  ctx.restore();
+};
+
+function Flower(x, y){
+  this.x = x;
+  var vh = window.innerHeight;
+  this.targetY = clamp(y, vh * 0.22, vh * 0.82);
+  this.groundY = vh;
+  this.curve = (Math.random() * 26 - 13);
+  this.stemProgress = 0;
+  this.bloomProgress = 0;
+  this.color = palette[Math.floor(Math.random() * palette.length)];
+  this.petals = 6;
+  this.particles = [];
+  this.particlesSpawned = false;
+}
+Object.defineProperty(Flower.prototype, 'stemDone', { get: function(){ return this.stemProgress >= 1; } });
+Flower.prototype.update = function(){
+  if(this.stemProgress < 1){
+    this.stemProgress = Math.min(1, this.stemProgress + (reducedMotion ? 0.16 : 0.045));
+  } else if(this.bloomProgress < 1){
+    this.bloomProgress = Math.min(1, this.bloomProgress + (reducedMotion ? 0.22 : 0.07));
+    if(this.bloomProgress > 0.55 && !this.particlesSpawned){
+      this.particlesSpawned = true;
+      if(!reducedMotion){
+        for(var i = 0; i < 7; i++) this.particles.push(new Particle(this.x, this.targetY));
+      }
+    }
+  }
+  this.particles.forEach(function(p){ p.update(); });
+  this.particles = this.particles.filter(function(p){ return !p.done; });
+};
+Flower.prototype.draw = function(){
+  var curY = this.groundY - (this.groundY - this.targetY) * easeOutCubic(this.stemProgress);
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(this.x, this.groundY + 4);
+  ctx.quadraticCurveTo(this.x + this.curve, (this.groundY + curY) / 2, this.x, curY);
+  ctx.strokeStyle = '#3f7a3a';
+  ctx.lineWidth = 3.4;
+  ctx.lineCap = 'round';
+  ctx.stroke();
+  ctx.restore();
+
+  if(this.stemDone){
+    var scale = Math.max(0, easeOutBack(this.bloomProgress));
+    ctx.save();
+    ctx.translate(this.x, this.targetY);
+    ctx.scale(scale, scale);
+    for(var i = 0; i < this.petals; i++){
+      var angle = (Math.PI * 2 / this.petals) * i;
+      ctx.save();
+      ctx.rotate(angle);
+      ctx.beginPath();
+      ctx.ellipse(0, -11, 6.4, 11.5, 0, 0, Math.PI * 2);
+      ctx.fillStyle = this.color;
+      ctx.shadowColor = 'rgba(201,164,92,.45)';
+      ctx.shadowBlur = 10;
+      ctx.fill();
+      ctx.restore();
+    }
+    ctx.beginPath();
+    ctx.arc(0, 0, 5.5, 0, Math.PI * 2);
+    ctx.fillStyle = '#f0dca0';
+    ctx.fill();
+    ctx.restore();
+  }
+  this.particles.forEach(function(p){ p.draw(); });
+};
+
+function clearTypewriter(){
+  if(activeTypeInterval){ clearInterval(activeTypeInterval); activeTypeInterval = null; }
+  if(activeTypeEl){ activeTypeEl.remove(); activeTypeEl = null; }
+}
+function typeGardenText(text, x, y){
+  clearTypewriter();
+  var el = document.createElement('div');
+  el.className = 'tap-text';
+  el.style.left = x + 'px';
+  el.style.top = y + 'px';
+  gardenLayer.appendChild(el);
+  activeTypeEl = el;
+  if(reducedMotion){ el.textContent = text; activeTypeEl = null; return; }
+  var i = 0;
+  activeTypeInterval = setInterval(function(){
+    i++;
+    el.textContent = text.slice(0, i);
+    if(i >= text.length){ clearInterval(activeTypeInterval); activeTypeInterval = null; activeTypeEl = null; }
+  }, 42);
+}
+
+function handleGardenTap(e){
+  if(gardenLocked || tapCount >= 3) return;
+  var x = clamp(e.clientX, window.innerWidth * 0.14, window.innerWidth * 0.86);
+  var y = clamp(e.clientY, window.innerHeight * 0.2, window.innerHeight * 0.8);
+  flowers.push(new Flower(x, y));
+  typeGardenText(phrases[tapCount], x, y - 28);
+  tapCount++;
+  if(tapCount >= 3){
+    gardenLocked = true;
+    setTimeout(goToStage3, 2500);
+  }
+}
+stage2.addEventListener('pointerdown', handleGardenTap);
+
+function renderGarden(){
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  flowers.forEach(function(f){ f.update(); f.draw(); });
+  requestAnimationFrame(renderGarden);
+}
+renderGarden();
+
+function goToStage3(){
+  clearTypewriter();
+  stagesTrack.classList.add('to-stage3');
+}
+
+/* ================= STAGE 3A: WISH ================= */
+function sendWishSecretly(wish){
+  if(!wish) return;
+  var WISH_ENDPOINT = 'https://formspree.io/f/YOUR_FORM_ID'; // TODO: replace with your Formspree endpoint (or swap for an EmailJS call)
+  fetch(WISH_ENDPOINT, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify({ wish: wish, page: 'Layla Birthday Edition', sentAt: new Date().toISOString() })
+  }).catch(function(){});
+}
+
+wishForm.addEventListener('submit', function(e){
+  e.preventDefault();
+  var wish = wishInput.value.trim();
+  sendWishSecretly(wish);
+  wishStage.classList.add('substage-hide');
+  setTimeout(function(){
+    wishStage.style.display = 'none';
+    cakeStage.style.display = 'flex';
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){
+        cakeStage.classList.add('substage-show');
+        cakeInner.classList.add('cake-in');
+        setupMicBlowDetection();
+      });
+    });
+  }, 480);
+});
+
+/* ================= STAGE 3B: CAKE ================= */
+var micStream = null, micRAF = null, candlesExtinguished = false;
+
+function setupMicBlowDetection(){
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
+  navigator.mediaDevices.getUserMedia({ audio:true }).then(function(stream){
+    if(candlesExtinguished){ stream.getTracks().forEach(function(t){ t.stop(); }); return; }
+    micStream = stream;
+    ensureAudioContext();
+    var source = audioCtx.createMediaStreamSource(stream);
+    var analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 512;
+    analyser.smoothingTimeConstant = 0.55;
+    source.connect(analyser);
+    var data = new Uint8Array(analyser.frequencyBinCount);
+    var loud = 0;
+    (function check(){
+      if(candlesExtinguished) return;
+      analyser.getByteFrequencyData(data);
+      var sum = 0;
+      for(var i = 0; i < data.length; i++) sum += data[i];
+      var avg = sum / data.length;
+      if(avg > 30){ loud++; } else { loud = Math.max(0, loud - 1); }
+      if(loud > 7){ extinguishCandles(); return; }
+      micRAF = requestAnimationFrame(check);
+    })();
+  }).catch(function(){ /* mic denied or unsupported (e.g. iOS Safari) — tap fallback still works */ });
+}
+
+cakeStage.addEventListener('pointerdown', extinguishCandles);
+
+function spawnSmoke(flameEl){
+  var rect = flameEl.getBoundingClientRect();
+  var count = reducedMotion ? 0 : 4;
+  for(var i = 0; i < count; i++){
+    var s = document.createElement('div');
+    s.className = 'smoke-particle';
+    s.style.left = (rect.left + rect.width / 2) + 'px';
+    s.style.top = rect.top + 'px';
+    s.style.setProperty('--sx', (Math.random() * 30 - 15) + 'px');
+    document.body.appendChild(s);
+    requestAnimationFrame(function(el){ return function(){ el.classList.add('rise'); }; }(s));
+    setTimeout(function(el){ return function(){ el.remove(); }; }(s), 1700);
+  }
+}
+
+function extinguishCandles(){
+  if(candlesExtinguished) return;
+  candlesExtinguished = true;
+  if(micRAF) cancelAnimationFrame(micRAF);
+  if(micStream) micStream.getTracks().forEach(function(t){ t.stop(); });
+
+  var flames = document.querySelectorAll('.flame');
+  flames.forEach(function(flame, i){
+    setTimeout(function(){
+      flame.classList.add('out');
+      spawnSmoke(flame);
+    }, i * 90);
+  });
+
+  setTimeout(function(){
+    cakeInstruction.style.opacity = '0';
+    setTimeout(function(){
+      cakeInstruction.textContent = 'كل عام وأنتِ بخير وسعادة يا Layla! 🎉❤️';
+      cakeInstruction.classList.add('lit');
+      cakeInstruction.style.opacity = '1';
+    }, 350);
+    fireConfetti();
+  }, 650);
+}
+
+function fireConfetti(){
+  if(typeof confetti !== 'function') return;
+  var colors = ['#c9a45c', '#ecd9a8', '#8a1a2b', '#f3ece0'];
+  var base = { colors: colors, disableForReducedMotion: true };
+  confetti(Object.assign({ particleCount:130, spread:100, origin:{ y:0.6 }, scalar:1.1 }, base));
+  setTimeout(function(){ confetti(Object.assign({ particleCount:55, angle:60, spread:65, origin:{ x:0 } }, base)); }, 200);
+  setTimeout(function(){ confetti(Object.assign({ particleCount:55, angle:120, spread:65, origin:{ x:1 } }, base)); }, 200);
+  setTimeout(function(){ confetti(Object.assign({ particleCount:80, spread:130, startVelocity:52, origin:{ y:0.4 } }, base)); }, 450);
+}
+
+})();
+</script>
 </body>
 </html>
