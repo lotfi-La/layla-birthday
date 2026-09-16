@@ -570,9 +570,10 @@ function resizeCanvas(){
 resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
 
-var phrases = ['أنتِ أعظم إنسان عرفته', 'وما زلت أعرفه', 'وسنبقى نعرفه ❤️'];
+var phrases = 'أنتِ أعظم إنسان عرفته وما زلت أعرفه وسنبقى نعرفه ❤️'.split(' ');
 var tapCount = 0, gardenLocked = false, activeTypeInterval = null, activeTypeEl = null;
 var flowers = [];
+var placedWordPositions = [];
 var palette = ['#f3ece0', '#d9b568', '#c9673a', '#d98a9c'];
 var petalCenterColor = '#e8a23a';
 
@@ -645,9 +646,9 @@ function Flower(x, y){
 Object.defineProperty(Flower.prototype, 'stemDone', { get: function(){ return this.stemProgress >= 1; } });
 Flower.prototype.update = function(){
   if(this.stemProgress < 1){
-    this.stemProgress = Math.min(1, this.stemProgress + (reducedMotion ? 0.16 : 0.045));
+    this.stemProgress = Math.min(1, this.stemProgress + (reducedMotion ? 0.16 : 0.028));
   } else if(this.bloomProgress < 1){
-    this.bloomProgress = Math.min(1, this.bloomProgress + (reducedMotion ? 0.22 : 0.07));
+    this.bloomProgress = Math.min(1, this.bloomProgress + (reducedMotion ? 0.22 : 0.055));
     if(this.bloomProgress > 0.55 && !this.particlesSpawned){
       this.particlesSpawned = true;
       if(!reducedMotion){
@@ -660,14 +661,32 @@ Flower.prototype.update = function(){
 };
 Flower.prototype.draw = function(){
   var curY = this.groundY - (this.groundY - this.targetY) * easeOutCubic(this.stemProgress);
+  var span = this.groundY - curY;
+  var cp1x = this.x + this.curve, cp1y = this.groundY - span * 0.32;
+  var cp2x = this.x - this.curve * 0.85, cp2y = this.groundY - span * 0.7;
   ctx.save();
   ctx.beginPath();
   ctx.moveTo(this.x, this.groundY + 4);
-  ctx.quadraticCurveTo(this.x + this.curve, (this.groundY + curY) / 2, this.x, curY);
+  ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, this.x, curY);
   ctx.strokeStyle = '#3f7a3a';
   ctx.lineWidth = 3.4;
   ctx.lineCap = 'round';
   ctx.stroke();
+
+  if(span > 40){
+    var leafT = 0.5, mt = 1 - leafT;
+    var leafX = mt*mt*mt*this.x + 3*mt*mt*leafT*cp1x + 3*mt*leafT*leafT*cp2x + leafT*leafT*leafT*this.x;
+    var leafY = mt*mt*mt*(this.groundY+4) + 3*mt*mt*leafT*cp1y + 3*mt*leafT*leafT*cp2y + leafT*leafT*leafT*curY;
+    var leafSide = this.curve >= 0 ? -1 : 1;
+    ctx.save();
+    ctx.translate(leafX, leafY);
+    ctx.rotate(leafSide * 0.9);
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 7, 2.8, 0, 0, Math.PI * 2);
+    ctx.fillStyle = '#4a8a42';
+    ctx.fill();
+    ctx.restore();
+  }
   ctx.restore();
 
   if(this.stemDone){
@@ -706,6 +725,21 @@ function clearTypewriter(){
   if(activeTypeInterval){ clearInterval(activeTypeInterval); activeTypeInterval = null; }
   if(activeTypeEl){ activeTypeEl.remove(); activeTypeEl = null; }
 }
+function findClearY(x, y){
+  var minDX = 85, minDY = 44, clearY = y, tries = 0, collided = true;
+  while(collided && tries < 14){
+    collided = false;
+    for(var i = 0; i < placedWordPositions.length; i++){
+      var p = placedWordPositions[i];
+      if(Math.abs(x - p.x) < minDX && Math.abs(clearY - p.y) < minDY){
+        clearY = p.y - minDY;
+        collided = true;
+      }
+    }
+    tries++;
+  }
+  return clamp(clearY, window.innerHeight * 0.1, window.innerHeight);
+}
 function typeGardenText(text, x, y){
   clearTypewriter();
   var el = document.createElement('div');
@@ -713,6 +747,7 @@ function typeGardenText(text, x, y){
   el.style.left = x + 'px';
   el.style.top = y + 'px';
   gardenLayer.appendChild(el);
+  placedWordPositions.push({ x: x, y: y });
   activeTypeEl = el;
   if(reducedMotion){ el.textContent = text; activeTypeEl = null; return; }
   var i = 0;
@@ -724,13 +759,14 @@ function typeGardenText(text, x, y){
 }
 
 function handleGardenTap(e){
-  if(gardenLocked || tapCount >= 3) return;
+  if(gardenLocked || tapCount >= phrases.length) return;
   var x = clamp(e.clientX, window.innerWidth * 0.14, window.innerWidth * 0.86);
   var y = clamp(e.clientY, window.innerHeight * 0.2, window.innerHeight * 0.8);
   flowers.push(new Flower(x, y));
-  typeGardenText(phrases[tapCount], x, y - 28);
+  var labelY = findClearY(x, y - 28);
+  typeGardenText(phrases[tapCount], x, labelY);
   tapCount++;
-  if(tapCount >= 3){
+  if(tapCount >= phrases.length){
     gardenLocked = true;
     setTimeout(goToStage3, 2500);
   }
