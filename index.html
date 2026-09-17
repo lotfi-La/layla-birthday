@@ -129,17 +129,17 @@ button{ -webkit-appearance:none; appearance:none; }
 .candle-tap-btn{
   position:absolute;
   z-index:6;
-  width:64px; height:64px;
+  width:66px; height:66px;
   border-radius:50%;
-  border:1px solid rgba(236,217,168,.85);
+  border:1px solid rgba(255,230,180,.95);
   background:
-    radial-gradient(circle at 35% 30%, rgba(255,224,150,.95), rgba(201,164,92,.55) 55%, rgba(92,15,26,.25) 100%);
+    radial-gradient(circle at 33% 28%, rgba(255,255,255,.95), rgba(255,214,150,.65) 38%, rgba(255,150,60,.35) 68%, rgba(120,55,15,.16) 100%);
   box-shadow:
-    0 0 18px rgba(255, 200, 120, .55),
-    0 0 46px rgba(201,164,92,.45),
-    inset 0 0 14px rgba(255,255,255,.35);
+    0 0 22px 4px rgba(255,196,110,.65),
+    0 0 48px 16px rgba(255,150,60,.38),
+    inset 0 0 16px rgba(255,255,255,.6);
   opacity:0;
-  transform:scale(.4);
+  transform:translate(-50%,-50%) scale(.35);
   pointer-events:none;
   cursor:pointer;
   padding:0;
@@ -147,18 +147,56 @@ button{ -webkit-appearance:none; appearance:none; }
 }
 .candle-tap-btn.show{
   opacity:1;
-  transform:scale(1);
+  transform:translate(-50%,-50%) scale(1);
   pointer-events:auto;
-  animation:candleShake 1.1s ease-in-out infinite;
+  animation:candleShake 1s ease-in-out infinite, candlePulse 1.6s ease-in-out infinite;
 }
 @keyframes candleShake{
-  0%, 100%{ transform:scale(1) translate(0,0) rotate(0deg); }
-  20%{ transform:scale(1.05) translate(-3px,1px) rotate(-4deg); }
-  40%{ transform:scale(1.05) translate(3px,-1px) rotate(4deg); }
-  60%{ transform:scale(1.05) translate(-2px,1px) rotate(-3deg); }
-  80%{ transform:scale(1.05) translate(2px,-1px) rotate(3deg); }
+  0%, 100%{ transform:translate(-50%,-50%) scale(1) rotate(0deg); }
+  20%{ transform:translate(calc(-50% - 3px), calc(-50% + 1px)) scale(1.05) rotate(-5deg); }
+  40%{ transform:translate(calc(-50% + 3px), calc(-50% - 1px)) scale(1.05) rotate(5deg); }
+  60%{ transform:translate(calc(-50% - 2px), calc(-50% + 1px)) scale(1.05) rotate(-3deg); }
+  80%{ transform:translate(calc(-50% + 2px), calc(-50% - 1px)) scale(1.05) rotate(3deg); }
+}
+@keyframes candlePulse{
+  0%, 100%{
+    box-shadow:
+      0 0 22px 4px rgba(255,196,110,.65),
+      0 0 48px 16px rgba(255,150,60,.38),
+      inset 0 0 16px rgba(255,255,255,.6);
+  }
+  50%{
+    box-shadow:
+      0 0 32px 9px rgba(255,214,145,.9),
+      0 0 68px 24px rgba(255,164,75,.55),
+      inset 0 0 22px rgba(255,255,255,.8);
+  }
 }
 .candle-tap-btn.show.no-shake{ animation:none; }
+
+.candle-tap-btn .spark{
+  position:absolute;
+  left:50%; top:50%;
+  width:4px; height:4px;
+  margin:-2px 0 0 -2px;
+  border-radius:50%;
+  background:#ffe3ab;
+  box-shadow:0 0 7px 2px rgba(255,196,110,.9);
+  opacity:0;
+  pointer-events:none;
+  animation:sparkFly 1.5s ease-out infinite;
+}
+.candle-tap-btn.no-shake .spark{ display:none; }
+.candle-tap-btn .spark:nth-child(1){ --dx:-16px; --dy:-30px; animation-delay:0s; }
+.candle-tap-btn .spark:nth-child(2){ --dx:-6px;  --dy:-36px; animation-delay:.28s; }
+.candle-tap-btn .spark:nth-child(3){ --dx:5px;   --dy:-34px; animation-delay:.56s; }
+.candle-tap-btn .spark:nth-child(4){ --dx:15px;  --dy:-28px; animation-delay:.84s; }
+.candle-tap-btn .spark:nth-child(5){ --dx:0px;   --dy:-40px; animation-delay:1.1s; }
+@keyframes sparkFly{
+  0%{ opacity:0; transform:translate(0,0) scale(.5); }
+  18%{ opacity:1; }
+  100%{ opacity:0; transform:translate(var(--dx,0px), var(--dy,-32px)) scale(1); }
+}
 
 .intro-title{
   font-family:'Playfair Display', serif;
@@ -372,7 +410,9 @@ canvas#flowerCanvas{ position:absolute; inset:0; width:100%; height:100%; displa
   <video id="welcomeVideo" playsinline preload="auto">
     <source src="welcome.mp4" type="video/mp4">
   </video>
-  <button type="button" class="candle-tap-btn" id="candleTapBtn" aria-label="أشعل الشمعة" tabindex="-1"></button>
+  <button type="button" class="candle-tap-btn" id="candleTapBtn" aria-label="أشعل الشمعة" tabindex="-1">
+    <span class="spark"></span><span class="spark"></span><span class="spark"></span><span class="spark"></span><span class="spark"></span>
+  </button>
   <div class="intro-card" id="introCard">
     <h1 class="intro-title" dir="ltr">Layla's Birthday<br>Edition</h1>
     <button type="button" class="start-btn" id="startBtn">
@@ -605,32 +645,50 @@ startBtn.addEventListener('click', function(){
 
 /* ================= WELCOME VIDEO: CANDLE TAP POINTS ================= */
 var candleTapBtn = document.getElementById('candleTapBtn');
+/* fx/fy = the exact spot in the SOURCE video frame (0-1 fractions) to sit the button on:
+   candle 1 has no visible hand (the flame flashes in on its own) -> sit on the candle itself.
+   candle 2's hand+lighter is on screen well before it strikes -> sit on the flint/thumb. */
 var candleCheckpoints = [
-  { time: 20, triggered: false },
-  { time: 24, triggered: false }
+  { time: 19.35, fx: 0.208, fy: 0.516, triggered: false }, // just before the off-screen flash lights candle 1 (~19.5-19.6s)
+  { time: 24.2,  fx: 0.722, fy: 0.711, triggered: false }  // just before the lighter flicks alight on candle 2 (~24.35-24.4s)
 ];
 var candleWaiting = false;
+var activeCandleCheckpoint = null;
 
-function positionCandleBtn(){
-  var btnSize = 64;
-  var marginX = 24;
-  var marginTop = 90;   // stay clear of top safe area
-  var marginBottom = 110; // stay clear of the intro card / bottom safe area
-  var maxX = Math.max(window.innerWidth - marginX * 2 - btnSize, 40);
-  var maxY = Math.max(window.innerHeight - marginTop - marginBottom - btnSize, 40);
-  var x = marginX + Math.random() * maxX;
-  var y = marginTop + Math.random() * maxY;
-  candleTapBtn.style.left = x + 'px';
-  candleTapBtn.style.top = y + 'px';
+/* Maps a point in the source video frame to on-screen px, matching the
+   object-fit:cover crop, so the button sits exactly on the candle/hand
+   regardless of viewport size/aspect. */
+function videoPointToScreen(fx, fy){
+  var vw = welcomeVideo.videoWidth, vh = welcomeVideo.videoHeight;
+  var cw = window.innerWidth, ch = window.innerHeight;
+  if(!vw || !vh){ return { x: cw * fx, y: ch * fy }; } // metadata not ready yet: rough fallback
+  var scale = Math.max(cw / vw, ch / vh);
+  var renderedW = vw * scale, renderedH = vh * scale;
+  var offsetX = (cw - renderedW) / 2;
+  var offsetY = (ch - renderedH) / 2;
+  var x = offsetX + fx * renderedW;
+  var y = offsetY + fy * renderedH;
+  var margin = 40;
+  x = clamp(x, margin, cw - margin);
+  y = clamp(y, margin, ch - margin);
+  return { x: x, y: y };
 }
 
-function showCandleTapBtn(){
-  positionCandleBtn();
+function positionCandleBtn(cp){
+  var pt = videoPointToScreen(cp.fx, cp.fy);
+  candleTapBtn.style.left = pt.x + 'px';
+  candleTapBtn.style.top = pt.y + 'px';
+}
+
+function showCandleTapBtn(cp){
+  activeCandleCheckpoint = cp;
+  positionCandleBtn(cp);
   candleTapBtn.classList.toggle('no-shake', !!reducedMotion);
   candleTapBtn.classList.add('show');
 }
 function hideCandleTapBtn(){
   candleTapBtn.classList.remove('show');
+  activeCandleCheckpoint = null;
 }
 
 welcomeVideo.addEventListener('timeupdate', function(){
@@ -641,10 +699,14 @@ welcomeVideo.addEventListener('timeupdate', function(){
       cp.triggered = true;
       candleWaiting = true;
       welcomeVideo.pause();
-      showCandleTapBtn();
+      showCandleTapBtn(cp);
       break;
     }
   }
+});
+
+window.addEventListener('resize', function(){
+  if(candleWaiting && activeCandleCheckpoint){ positionCandleBtn(activeCandleCheckpoint); }
 });
 
 candleTapBtn.addEventListener('click', function(){
