@@ -667,8 +667,9 @@ Flower.prototype.update = function(){
 Flower.prototype.draw = function(){
   var curY = this.groundY - (this.groundY - this.targetY) * easeOutCubic(this.stemProgress);
   var span = this.groundY - curY;
-  var cp1x = this.x + this.curve, cp1y = this.groundY - span * 0.32;
-  var cp2x = this.x - this.curve * 0.85, cp2y = this.groundY - span * 0.7;
+  var sway = reducedMotion ? 0 : Math.sin(sparkleFrame * 0.025 + this.noiseSeed) * 3.2 * this.stemProgress;
+  var cp1x = this.x + this.curve + sway, cp1y = this.groundY - span * 0.32;
+  var cp2x = this.x - this.curve * 0.85 - sway * 0.6, cp2y = this.groundY - span * 0.7;
   ctx.save();
   ctx.beginPath();
   ctx.moveTo(this.x, this.groundY + 4);
