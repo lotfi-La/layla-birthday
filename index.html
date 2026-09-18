@@ -645,15 +645,18 @@ startBtn.addEventListener('click', function(){
 
 /* ================= WELCOME VIDEO: CANDLE TAP POINTS ================= */
 var candleTapBtn = document.getElementById('candleTapBtn');
-/* fx/fy = the exact spot in the SOURCE video frame (0-1 fractions) to sit the button on:
+/* fx/fy = the exact spot in the SOURCE video frame (0-1 fractions) to sit the button on,
+   measured directly off the frame at each checkpoint's own timestamp (the hand keeps
+   moving, so the anchor has to match THAT instant, not an earlier one):
    candle 1 has no visible hand (the flame flashes in on its own) -> sit on the candle itself.
    candle 2's hand+lighter is on screen well before it strikes -> sit on the flint/thumb. */
 var candleCheckpoints = [
-  { time: 19.35, fx: 0.208, fy: 0.516, triggered: false }, // just before the off-screen flash lights candle 1 (~19.5-19.6s)
-  { time: 24.2,  fx: 0.722, fy: 0.711, triggered: false }  // just before the lighter flicks alight on candle 2 (~24.35-24.4s)
+  { time: 19.3, rampFrom: 18.9,  fx: 0.208, fy: 0.516, triggered: false }, // just before the off-screen flash lights candle 1 (~19.5-19.6s)
+  { time: 24.2, rampFrom: 23.8,  fx: 0.653, fy: 0.609, triggered: false }  // just before the lighter flicks alight on candle 2 (~24.35-24.4s)
 ];
 var candleWaiting = false;
 var activeCandleCheckpoint = null;
+var candleRampActive = null;
 
 /* Maps a point in the source video frame to on-screen px, matching the
    object-fit:cover crop, so the button sits exactly on the candle/hand
@@ -691,19 +694,37 @@ function hideCandleTapBtn(){
   activeCandleCheckpoint = null;
 }
 
-welcomeVideo.addEventListener('timeupdate', function(){
-  if(candleWaiting) return;
-  for(var i = 0; i < candleCheckpoints.length; i++){
-    var cp = candleCheckpoints[i];
-    if(!cp.triggered && welcomeVideo.currentTime >= cp.time){
-      cp.triggered = true;
-      candleWaiting = true;
-      welcomeVideo.pause();
-      showCandleTapBtn(cp);
-      break;
+/* requestAnimationFrame gives us a check roughly every frame (far tighter than the
+   'timeupdate' event, which mobile browsers can throttle to only a few times a
+   second — coarse enough that currentTime can already be past the flash/flame by
+   the time it fires). This also drives a short, smooth playbackRate ramp-down
+   into each pause instead of a hard stop. */
+function candleFrameTick(){
+  if(!welcomeVideo.paused && !welcomeVideo.ended){
+    var t = welcomeVideo.currentTime;
+    for(var i = 0; i < candleCheckpoints.length; i++){
+      var cp = candleCheckpoints[i];
+      if(cp.triggered) continue;
+      if(t >= cp.rampFrom && t < cp.time){
+        if(candleRampActive !== cp){ candleRampActive = cp; }
+        var progress = (t - cp.rampFrom) / (cp.time - cp.rampFrom);
+        var rate = 1 - progress * 0.72; // eases down to ~0.28x right before the pause
+        welcomeVideo.playbackRate = Math.max(0.22, rate);
+      }
+      if(t >= cp.time){
+        cp.triggered = true;
+        candleWaiting = true;
+        candleRampActive = null;
+        welcomeVideo.playbackRate = 1;
+        welcomeVideo.pause();
+        showCandleTapBtn(cp);
+        break;
+      }
     }
   }
-});
+  requestAnimationFrame(candleFrameTick);
+}
+requestAnimationFrame(candleFrameTick);
 
 window.addEventListener('resize', function(){
   if(candleWaiting && activeCandleCheckpoint){ positionCandleBtn(activeCandleCheckpoint); }
@@ -713,6 +734,7 @@ candleTapBtn.addEventListener('click', function(){
   if(!candleWaiting) return;
   candleWaiting = false;
   hideCandleTapBtn();
+  welcomeVideo.playbackRate = 1;
   var playPromise = welcomeVideo.play();
   if(playPromise && playPromise.catch){ playPromise.catch(function(){}); }
 });
