@@ -334,6 +334,21 @@ button{ -webkit-appearance:none; appearance:none; }
   font-weight:500;
 }
 
+/* ================= Stage 5: FIREWORKS VIDEO (right fork path) ================= */
+.fireworks-stage-wrap{
+  position:fixed; inset:0; z-index:135;
+  background:#000;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity 1s ease;
+}
+.fireworks-stage-wrap.show{ opacity:1; pointer-events:auto; }
+#fireworksVideo{
+  width:100%; height:100%;
+  object-fit:cover;
+  display:block;
+}
+
 /* ================= TEMPORARY placeholder for unfinished fork paths ================= */
 .placeholder-stage-wrap{
   position:fixed; inset:0; z-index:145;
@@ -567,6 +582,13 @@ canvas#flowerCanvas{ position:absolute; inset:0; width:100%; height:100%; displa
   </div>
 </div>
 
+<!-- STAGE 5: FIREWORKS VIDEO (right/correct fork path) -->
+<div class="fireworks-stage-wrap" id="fireworksStageWrap">
+  <video id="fireworksVideo" playsinline preload="auto">
+    <source src="fireworks.mp4" type="video/mp4">
+  </video>
+</div>
+
 <!-- TEMPORARY placeholder screen for whichever fork path is chosen — will be replaced once each stage is actually built -->
 <div class="placeholder-stage-wrap" id="placeholderStageWrap">
   <p class="placeholder-text" id="placeholderText"></p>
@@ -685,6 +707,8 @@ var wishSentMsg = document.getElementById('wishSentMsg');
 var forkStageWrap = document.getElementById('forkStageWrap');
 var forkRightBtn = document.getElementById('forkRightBtn');
 var forkLeftBtn = document.getElementById('forkLeftBtn');
+var fireworksStageWrap = document.getElementById('fireworksStageWrap');
+var fireworksVideo = document.getElementById('fireworksVideo');
 var placeholderStageWrap = document.getElementById('placeholderStageWrap');
 var placeholderText = document.getElementById('placeholderText');
 var cakeStage = document.getElementById('cakeStage');
@@ -1201,10 +1225,19 @@ function showPlaceholder(text){
   }, 500);
 }
 
+/* ================= STAGE 5: FIREWORKS VIDEO ================= */
+function goToFireworksStage(){
+  forkStageWrap.classList.remove('show');
+  setTimeout(function(){
+    fireworksStageWrap.classList.add('show');
+    var p = fireworksVideo.play();
+    if(p && p.catch) p.catch(function(){});
+  }, 500);
+}
+
 forkRightBtn.addEventListener('click', function(){
   fadeOutBgMusic();
-  // TODO: once the fireworks video is sent, replace this with the real transition into it
-  showPlaceholder('🎆 هنا سيبدأ لاحقاً فيديو الألعاب النارية (لم يُربط بعد)');
+  goToFireworksStage();
 });
 
 forkLeftBtn.addEventListener('click', function(){
