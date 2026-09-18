@@ -254,42 +254,83 @@ button{ -webkit-appearance:none; appearance:none; }
 /* ================= Stage 3: CELEBRATION FORK ================= */
 .fork-stage-wrap{
   position:fixed; inset:0; z-index:140;
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  gap:36px;
-  padding:24px;
-  background:var(--bg);
   opacity:0;
   pointer-events:none;
   transition:opacity 1s ease;
 }
 .fork-stage-wrap.show{ opacity:1; pointer-events:auto; }
 .fork-title{
+  position:absolute; top:12%; left:0; right:0;
   font-family:'Cinzel', serif;
   font-weight:700;
-  font-size:clamp(1.15rem, 5.2vw, 1.5rem);
+  font-size:clamp(1.1rem, 5vw, 1.4rem);
   color:var(--cream);
   text-align:center;
   letter-spacing:.02em;
+  padding:0 20px;
 }
-.fork-choices{ display:flex; gap:18px; flex-wrap:wrap; justify-content:center; }
-.fork-btn{
-  border:1px solid rgba(201,164,92,.5);
-  padding:14px 26px;
-  font-weight:700;
-  font-size:.95rem;
+.fork-option{
+  position:absolute;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:16px;
+}
+.fork-option-left{ top:40%; left:9%; }
+.fork-option-right{ top:47%; right:9%; }
+.fork-label{
+  color:var(--cream);
+  font-weight:600;
+  font-size:1rem;
+  text-shadow:0 2px 14px rgba(0,0,0,.9);
+  white-space:nowrap;
+}
+.fork-dot{
+  width:46px; height:46px;
+  border-radius:50%;
+  background:transparent;
+  border:none;
+  padding:0;
   cursor:pointer;
   touch-action:manipulation;
   transition:transform .2s ease, box-shadow .2s ease;
 }
-.fork-btn:active{ transform:scale(.96); }
-.fork-btn-right{
-  background:linear-gradient(135deg, var(--wine), var(--wine-bright));
-  color:var(--gold-light);
-  box-shadow:0 6px 24px rgba(92,15,26,.4);
+.fork-dot:active{ transform:scale(.88); }
+
+/* left = decoy, deliberately made the more tempting/eye-catching of the two */
+.fork-option-left .fork-dot{
+  width:54px; height:54px;
+  box-shadow:
+    0 0 18px 6px rgba(255,196,110,.75),
+    0 0 44px 16px rgba(255,150,60,.45);
+  animation:forkDotPulse 1.4s ease-in-out infinite;
 }
-.fork-btn-left{
-  background:rgba(255,255,255,.04);
-  color:var(--cream);
+.fork-option-left .fork-label{
+  color:var(--gold-light);
+  font-weight:700;
+  text-shadow:0 0 18px rgba(255,178,90,.5), 0 2px 14px rgba(0,0,0,.9);
+}
+@keyframes forkDotPulse{
+  0%, 100%{
+    box-shadow:
+      0 0 18px 6px rgba(255,196,110,.75),
+      0 0 44px 16px rgba(255,150,60,.45);
+  }
+  50%{
+    box-shadow:
+      0 0 26px 10px rgba(255,214,145,.95),
+      0 0 60px 22px rgba(255,164,75,.6);
+  }
+}
+
+/* right = correct choice, deliberately understated so the eye drifts to the left */
+.fork-option-right .fork-dot{
+  width:36px; height:36px;
+  box-shadow:0 0 6px 2px rgba(180,180,180,.25);
+}
+.fork-option-right .fork-label{
+  color:rgba(243,236,224,.55);
+  font-weight:500;
 }
 
 /* ================= TEMPORARY placeholder for unfinished fork paths ================= */
@@ -515,9 +556,13 @@ canvas#flowerCanvas{ position:absolute; inset:0; width:100%; height:100%; displa
 <!-- STAGE 3: CELEBRATION FORK -->
 <div class="fork-stage-wrap" id="forkStageWrap">
   <h2 class="fork-title">يرجى اختيار أحد الخيارين</h2>
-  <div class="fork-choices">
-    <button type="button" class="fork-btn fork-btn-right" id="forkRightBtn">الاحتفال مع Lotfi 🎉</button>
-    <button type="button" class="fork-btn fork-btn-left" id="forkLeftBtn">الاحتفال لوحدها 🙃</button>
+  <div class="fork-option fork-option-left">
+    <p class="fork-label">الاحتفال وحدك</p>
+    <button type="button" class="fork-dot" id="forkLeftBtn" aria-label="الاحتفال وحدك"></button>
+  </div>
+  <div class="fork-option fork-option-right">
+    <p class="fork-label">الاحتفال مع Lotfi</p>
+    <button type="button" class="fork-dot" id="forkRightBtn" aria-label="الاحتفال مع Lotfi"></button>
   </div>
 </div>
 
