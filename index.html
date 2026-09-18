@@ -125,25 +125,39 @@ button{ -webkit-appearance:none; appearance:none; }
 }
 #welcomeVideo.video-visible{ opacity:1; }
 
-/* ================= Candle QTE button (welcome video) ================= */
+/* ================= Candle QTE: cinematic spotlight (dims everything but the button) ================= */
+.candle-spotlight{
+  position:absolute;
+  inset:0;
+  z-index:4;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .4s ease;
+  background:radial-gradient(circle at 50% 50%, rgba(0,0,0,0) 0px, rgba(0,0,0,0) 95px, rgba(0,0,0,.55) 230px, rgba(0,0,0,.72) 100%);
+}
+.candle-spotlight.show{ opacity:1; }
+
+/* ================= Candle QTE button (welcome video) — glowing dial/portal ================= */
 .candle-tap-btn{
   position:absolute;
   z-index:6;
-  width:66px; height:66px;
+  width:84px; height:84px;
   border-radius:50%;
-  border:1px solid rgba(255,230,180,.95);
-  background:
-    radial-gradient(circle at 33% 28%, rgba(255,255,255,.95), rgba(255,214,150,.65) 38%, rgba(255,150,60,.35) 68%, rgba(120,55,15,.16) 100%);
+  background:transparent;
+  border:none;
   box-shadow:
-    0 0 22px 4px rgba(255,196,110,.65),
-    0 0 48px 16px rgba(255,150,60,.38),
-    inset 0 0 16px rgba(255,255,255,.6);
+    0 0 24px 6px rgba(255,196,110,.55),
+    0 0 56px 20px rgba(255,150,60,.32);
   opacity:0;
   transform:translate(-50%,-50%) scale(.35);
   pointer-events:none;
   cursor:pointer;
   padding:0;
   transition:opacity .25s ease, transform .25s ease;
+}
+.candle-tap-btn .dial-svg{
+  width:100%; height:100%; display:block;
+  filter:drop-shadow(0 0 8px rgba(255,196,110,.85));
 }
 .candle-tap-btn.show{
   opacity:1;
@@ -161,42 +175,16 @@ button{ -webkit-appearance:none; appearance:none; }
 @keyframes candlePulse{
   0%, 100%{
     box-shadow:
-      0 0 22px 4px rgba(255,196,110,.65),
-      0 0 48px 16px rgba(255,150,60,.38),
-      inset 0 0 16px rgba(255,255,255,.6);
+      0 0 24px 6px rgba(255,196,110,.55),
+      0 0 56px 20px rgba(255,150,60,.32);
   }
   50%{
     box-shadow:
-      0 0 32px 9px rgba(255,214,145,.9),
-      0 0 68px 24px rgba(255,164,75,.55),
-      inset 0 0 22px rgba(255,255,255,.8);
+      0 0 34px 11px rgba(255,214,145,.8),
+      0 0 76px 28px rgba(255,164,75,.48);
   }
 }
 .candle-tap-btn.show.no-shake{ animation:none; }
-
-.candle-tap-btn .spark{
-  position:absolute;
-  left:50%; top:50%;
-  width:4px; height:4px;
-  margin:-2px 0 0 -2px;
-  border-radius:50%;
-  background:#ffe3ab;
-  box-shadow:0 0 7px 2px rgba(255,196,110,.9);
-  opacity:0;
-  pointer-events:none;
-  animation:sparkFly 1.5s ease-out infinite;
-}
-.candle-tap-btn.no-shake .spark{ display:none; }
-.candle-tap-btn .spark:nth-child(1){ --dx:-16px; --dy:-30px; animation-delay:0s; }
-.candle-tap-btn .spark:nth-child(2){ --dx:-6px;  --dy:-36px; animation-delay:.28s; }
-.candle-tap-btn .spark:nth-child(3){ --dx:5px;   --dy:-34px; animation-delay:.56s; }
-.candle-tap-btn .spark:nth-child(4){ --dx:15px;  --dy:-28px; animation-delay:.84s; }
-.candle-tap-btn .spark:nth-child(5){ --dx:0px;   --dy:-40px; animation-delay:1.1s; }
-@keyframes sparkFly{
-  0%{ opacity:0; transform:translate(0,0) scale(.5); }
-  18%{ opacity:1; }
-  100%{ opacity:0; transform:translate(var(--dx,0px), var(--dy,-32px)) scale(1); }
-}
 
 .intro-title{
   font-family:'Playfair Display', serif;
@@ -410,9 +398,8 @@ canvas#flowerCanvas{ position:absolute; inset:0; width:100%; height:100%; displa
   <video id="welcomeVideo" playsinline preload="auto">
     <source src="welcome.mp4" type="video/mp4">
   </video>
-  <button type="button" class="candle-tap-btn" id="candleTapBtn" aria-label="أشعل الشمعة" tabindex="-1">
-    <span class="spark"></span><span class="spark"></span><span class="spark"></span><span class="spark"></span><span class="spark"></span>
-  </button>
+  <div class="candle-spotlight" id="candleSpotlight"></div>
+  <button type="button" class="candle-tap-btn" id="candleTapBtn" aria-label="أشعل الشمعة" tabindex="-1"></button>
   <div class="intro-card" id="introCard">
     <h1 class="intro-title" dir="ltr">Layla's Birthday<br>Edition</h1>
     <button type="button" class="start-btn" id="startBtn">
@@ -645,18 +632,51 @@ startBtn.addEventListener('click', function(){
 
 /* ================= WELCOME VIDEO: CANDLE TAP POINTS ================= */
 var candleTapBtn = document.getElementById('candleTapBtn');
+var candleSpotlight = document.getElementById('candleSpotlight');
+
+/* Builds the glowing "dial" glyph (rings + tick marks + dots + warm core)
+   shown in the reference image, as inline SVG. */
+(function buildDialGlyph(){
+  var ticks = '';
+  for(var i = 0; i < 12; i++){
+    var a = i * 30 * Math.PI / 180;
+    var x1 = (50 + 39 * Math.cos(a)).toFixed(1), y1 = (50 + 39 * Math.sin(a)).toFixed(1);
+    var x2 = (50 + 46 * Math.cos(a)).toFixed(1), y2 = (50 + 46 * Math.sin(a)).toFixed(1);
+    ticks += '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="rgba(255,232,190,.85)" stroke-width="1.6" stroke-linecap="round"/>';
+  }
+  var dots = '';
+  for(var j = 0; j < 20; j++){
+    var b = j * 18 * Math.PI / 180;
+    var dx = (50 + 30 * Math.cos(b)).toFixed(1), dy = (50 + 30 * Math.sin(b)).toFixed(1);
+    dots += '<circle cx="'+dx+'" cy="'+dy+'" r="1.1" fill="rgba(255,225,175,.85)"/>';
+  }
+  candleTapBtn.innerHTML =
+    '<svg class="dial-svg" viewBox="0 0 100 100" aria-hidden="true">' +
+      '<defs><radialGradient id="dialCore" cx="50%" cy="45%" r="55%">' +
+        '<stop offset="0%" stop-color="#fffdf6"/>' +
+        '<stop offset="35%" stop-color="#ffe6ad"/>' +
+        '<stop offset="70%" stop-color="#ffb35c" stop-opacity=".55"/>' +
+        '<stop offset="100%" stop-color="#ffb35c" stop-opacity="0"/>' +
+      '</radialGradient></defs>' +
+      '<circle cx="50" cy="50" r="46" fill="none" stroke="rgba(255,225,170,.55)" stroke-width="1"/>' +
+      '<circle cx="50" cy="50" r="34" fill="none" stroke="rgba(255,225,170,.35)" stroke-width="1"/>' +
+      ticks + dots +
+      '<circle cx="50" cy="50" r="26" fill="url(#dialCore)"/>' +
+    '</svg>';
+})();
+
 /* fx/fy = the exact spot in the SOURCE video frame (0-1 fractions) to sit the button on,
    measured directly off the frame at each checkpoint's own timestamp (the hand keeps
    moving, so the anchor has to match THAT instant, not an earlier one):
    candle 1 has no visible hand (the flame flashes in on its own) -> sit on the candle itself.
-   candle 2's hand+lighter is on screen well before it strikes -> sit on the flint/thumb. */
+   candle 2's hand+lighter is on screen well before it strikes -> sit higher, over the top
+   of the hand/thumb, per the corrected position marked on the last screenshot. */
 var candleCheckpoints = [
-  { time: 19.3, rampFrom: 18.9,  fx: 0.208, fy: 0.516, triggered: false }, // just before the off-screen flash lights candle 1 (~19.5-19.6s)
-  { time: 24.2, rampFrom: 23.8,  fx: 0.653, fy: 0.609, triggered: false }  // just before the lighter flicks alight on candle 2 (~24.35-24.4s)
+  { time: 19.3, fx: 0.208, fy: 0.516, triggered: false }, // just before the off-screen flash lights candle 1 (~19.5-19.6s)
+  { time: 24.2, fx: 0.875, fy: 0.563, triggered: false }  // just before the lighter flicks alight on candle 2 (~24.35-24.4s)
 ];
 var candleWaiting = false;
 var activeCandleCheckpoint = null;
-var candleRampActive = null;
 
 /* Maps a point in the source video frame to on-screen px, matching the
    object-fit:cover crop, so the button sits exactly on the candle/hand
@@ -681,6 +701,8 @@ function positionCandleBtn(cp){
   var pt = videoPointToScreen(cp.fx, cp.fy);
   candleTapBtn.style.left = pt.x + 'px';
   candleTapBtn.style.top = pt.y + 'px';
+  candleSpotlight.style.background =
+    'radial-gradient(circle at ' + pt.x + 'px ' + pt.y + 'px, rgba(0,0,0,0) 0px, rgba(0,0,0,0) 95px, rgba(0,0,0,.55) 230px, rgba(0,0,0,.72) 100%)';
 }
 
 function showCandleTapBtn(cp){
@@ -688,34 +710,26 @@ function showCandleTapBtn(cp){
   positionCandleBtn(cp);
   candleTapBtn.classList.toggle('no-shake', !!reducedMotion);
   candleTapBtn.classList.add('show');
+  candleSpotlight.classList.add('show');
 }
 function hideCandleTapBtn(){
   candleTapBtn.classList.remove('show');
+  candleSpotlight.classList.remove('show');
   activeCandleCheckpoint = null;
 }
 
 /* requestAnimationFrame gives us a check roughly every frame (far tighter than the
    'timeupdate' event, which mobile browsers can throttle to only a few times a
    second — coarse enough that currentTime can already be past the flash/flame by
-   the time it fires). This also drives a short, smooth playbackRate ramp-down
-   into each pause instead of a hard stop. */
+   the time it fires). The video pauses instantly at each checkpoint, no ramp. */
 function candleFrameTick(){
   if(!welcomeVideo.paused && !welcomeVideo.ended){
     var t = welcomeVideo.currentTime;
     for(var i = 0; i < candleCheckpoints.length; i++){
       var cp = candleCheckpoints[i];
-      if(cp.triggered) continue;
-      if(t >= cp.rampFrom && t < cp.time){
-        if(candleRampActive !== cp){ candleRampActive = cp; }
-        var progress = (t - cp.rampFrom) / (cp.time - cp.rampFrom);
-        var rate = 1 - progress * 0.72; // eases down to ~0.28x right before the pause
-        welcomeVideo.playbackRate = Math.max(0.22, rate);
-      }
-      if(t >= cp.time){
+      if(!cp.triggered && t >= cp.time){
         cp.triggered = true;
         candleWaiting = true;
-        candleRampActive = null;
-        welcomeVideo.playbackRate = 1;
         welcomeVideo.pause();
         showCandleTapBtn(cp);
         break;
@@ -734,7 +748,6 @@ candleTapBtn.addEventListener('click', function(){
   if(!candleWaiting) return;
   candleWaiting = false;
   hideCandleTapBtn();
-  welcomeVideo.playbackRate = 1;
   var playPromise = welcomeVideo.play();
   if(playPromise && playPromise.catch){ playPromise.catch(function(){}); }
 });
