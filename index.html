@@ -863,7 +863,18 @@ window.addEventListener('resize', function(){
 candleTapBtn.addEventListener('click', function(){
   if(!candleWaiting) return;
   candleWaiting = false;
-  hideCandleTapBtn();
+  candleTapBtn.classList.remove('show'); // button disappears immediately — feels responsive
+  activeCandleCheckpoint = null;
+
+  var revealed = false;
+  function revealVideo(){
+    if(revealed) return;
+    revealed = true;
+    candleSpotlight.classList.remove('show'); // spotlight fades out only once playback is actually smooth
+  }
+  welcomeVideo.addEventListener('playing', revealVideo, { once:true });
+  setTimeout(revealVideo, 220); // safety fallback in case 'playing' doesn't fire
+
   var playPromise = welcomeVideo.play();
   if(playPromise && playPromise.catch){ playPromise.catch(function(){}); }
 });
