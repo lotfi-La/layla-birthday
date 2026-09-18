@@ -348,6 +348,59 @@ button{ -webkit-appearance:none; appearance:none; }
   object-fit:cover;
   display:block;
 }
+#fireworksVideo.punch{ animation:fireworksPunch .25s ease-out; }
+@keyframes fireworksPunch{
+  0%{ transform:scale(1) translate(0,0); }
+  30%{ transform:scale(1.025) translate(-4px, 2px); }
+  60%{ transform:scale(1.01) translate(3px, -2px); }
+  100%{ transform:scale(1) translate(0,0); }
+}
+
+.spark-tap-btn{
+  position:absolute;
+  z-index:6;
+  width:44px; height:44px;
+  border-radius:50%;
+  background:transparent;
+  border:none;
+  box-shadow:
+    0 0 14px 4px rgba(255,178,90,.6),
+    0 0 32px 12px rgba(255,140,50,.36);
+  opacity:0;
+  transform:translate(-50%,-50%) scale(.35);
+  pointer-events:none;
+  cursor:pointer;
+  padding:0;
+  transition:opacity .18s ease, transform .18s ease;
+}
+.spark-tap-btn .dial-svg{
+  width:100%; height:100%; display:block;
+  filter:drop-shadow(0 0 8px rgba(255,180,90,.95));
+}
+.spark-tap-btn.show{
+  opacity:1;
+  transform:translate(-50%,-50%) scale(1);
+  pointer-events:auto;
+  animation:sparkShake .55s ease-in-out infinite, sparkPulse .6s ease-in-out infinite;
+}
+@keyframes sparkShake{
+  0%, 100%{ transform:translate(-50%,-50%) scale(1) rotate(0deg); }
+  25%{ transform:translate(calc(-50% - 3px), calc(-50% + 1px)) scale(1.06) rotate(-6deg); }
+  50%{ transform:translate(-50%,-50%) scale(1) rotate(0deg); }
+  75%{ transform:translate(calc(-50% + 3px), calc(-50% - 1px)) scale(1.06) rotate(6deg); }
+}
+@keyframes sparkPulse{
+  0%, 100%{
+    box-shadow:
+      0 0 14px 4px rgba(255,178,90,.6),
+      0 0 32px 12px rgba(255,140,50,.36);
+  }
+  50%{
+    box-shadow:
+      0 0 22px 8px rgba(255,214,145,.95),
+      0 0 48px 18px rgba(255,164,75,.6);
+  }
+}
 
 /* ================= TEMPORARY placeholder for unfinished fork paths ================= */
 .placeholder-stage-wrap{
@@ -587,6 +640,7 @@ canvas#flowerCanvas{ position:absolute; inset:0; width:100%; height:100%; displa
   <video id="fireworksVideo" playsinline preload="auto">
     <source src="fireworks.mp4" type="video/mp4">
   </video>
+  <button type="button" class="spark-tap-btn" id="sparkTapBtn" aria-label="اضغطي"></button>
 </div>
 
 <!-- TEMPORARY placeholder screen for whichever fork path is chosen — will be replaced once each stage is actually built -->
@@ -709,6 +763,8 @@ var forkRightBtn = document.getElementById('forkRightBtn');
 var forkLeftBtn = document.getElementById('forkLeftBtn');
 var fireworksStageWrap = document.getElementById('fireworksStageWrap');
 var fireworksVideo = document.getElementById('fireworksVideo');
+var sparkTapBtn = document.getElementById('sparkTapBtn');
+sparkTapBtn.innerHTML = buildDialSvgMarkup();
 var placeholderStageWrap = document.getElementById('placeholderStageWrap');
 var placeholderText = document.getElementById('placeholderText');
 var cakeStage = document.getElementById('cakeStage');
@@ -845,8 +901,9 @@ var candleTapBtn = document.getElementById('candleTapBtn');
 var candleSpotlight = document.getElementById('candleSpotlight');
 
 /* Builds the glowing "dial" glyph (rings + tick marks + dots + warm core)
-   shown in the reference image, as inline SVG. */
-(function buildDialGlyph(){
+   shown in the reference image, as inline SVG. Shared by every tap button
+   in the site (candle + fireworks spark taps) for a consistent look. */
+function buildDialSvgMarkup(){
   var ticks = '';
   for(var i = 0; i < 12; i++){
     var a = i * 30 * Math.PI / 180;
@@ -860,8 +917,7 @@ var candleSpotlight = document.getElementById('candleSpotlight');
     var dx = (50 + 30 * Math.cos(b)).toFixed(1), dy = (50 + 30 * Math.sin(b)).toFixed(1);
     dots += '<circle cx="'+dx+'" cy="'+dy+'" r="1.1" fill="rgba(255,225,175,.85)"/>';
   }
-  candleTapBtn.innerHTML =
-    '<svg class="dial-svg" viewBox="0 0 100 100" aria-hidden="true">' +
+  return '<svg class="dial-svg" viewBox="0 0 100 100" aria-hidden="true">' +
       '<defs><radialGradient id="dialCore" cx="50%" cy="45%" r="55%">' +
         '<stop offset="0%" stop-color="#fffdf6"/>' +
         '<stop offset="35%" stop-color="#ffe6ad"/>' +
@@ -873,7 +929,9 @@ var candleSpotlight = document.getElementById('candleSpotlight');
       ticks + dots +
       '<circle cx="50" cy="50" r="26" fill="url(#dialCore)"/>' +
     '</svg>';
-})();
+}
+candleTapBtn.innerHTML = buildDialSvgMarkup();
+
 
 /* fx/fy = the exact spot in the SOURCE video frame (0-1 fractions) to sit the button on,
    measured directly off the frame at each checkpoint's own timestamp (the hand keeps
@@ -889,10 +947,11 @@ var candleWaiting = false;
 var activeCandleCheckpoint = null;
 
 /* Maps a point in the source video frame to on-screen px, matching the
-   object-fit:cover crop, so the button sits exactly on the candle/hand
-   regardless of viewport size/aspect. */
-function videoPointToScreen(fx, fy){
-  var vw = welcomeVideo.videoWidth, vh = welcomeVideo.videoHeight;
+   object-fit:cover crop, so the button sits exactly on the candle/hand/spark
+   regardless of viewport size/aspect. Generalized so any full-screen cover
+   video in the site (welcome video, fireworks video, ...) can reuse it. */
+function videoPointToScreenFor(video, fx, fy){
+  var vw = video.videoWidth, vh = video.videoHeight;
   var cw = window.innerWidth, ch = window.innerHeight;
   if(!vw || !vh){ return { x: cw * fx, y: ch * fy }; } // metadata not ready yet: rough fallback
   var scale = Math.max(cw / vw, ch / vh);
@@ -905,6 +964,9 @@ function videoPointToScreen(fx, fy){
   x = clamp(x, margin, cw - margin);
   y = clamp(y, margin, ch - margin);
   return { x: x, y: y };
+}
+function videoPointToScreen(fx, fy){
+  return videoPointToScreenFor(welcomeVideo, fx, fy);
 }
 
 function positionCandleBtn(cp){
@@ -1245,6 +1307,87 @@ forkLeftBtn.addEventListener('click', function(){
   // TODO: once 4105.mp4 is sent, replace this with the real "kick" video + the stubbornness counter logic
   showPlaceholder('🎬 هنا سيُشغَّل لاحقاً فيديو الطرد (لم يُرسَل بعد)');
 });
+
+/* ================= STAGE 5: FIREWORKS SPARK TAPS =================
+   Timed to the strongest simultaneous audio-beat + visual-burst moments
+   (measured directly off this video's own waveform + frame brightness),
+   per plan agreed with Lotfi. The video never pauses for these — they're
+   a light, fast, energetic overlay, not a hard gate like the candle taps. */
+var sparkCheckpoints = [
+  { time: 2.8,  fx: 0.55, fy: 0.55, window: 1.3 },
+  { time: 7.9,  fx: 0.40, fy: 0.53, window: 1.3 },
+  { time: 11.5, fx: 0.42, fy: 0.52, window: 1.3 },
+  { time: 16.5, fx: 0.45, fy: 0.57, window: 1.3 },
+  { time: 19.5, fx: 0.15, fy: 0.38, window: 1.3 }
+];
+var finalSparkCheckpoint = { time: 23.1, fx: 0.55, fy: 0.68, window: 4.0, tapsNeeded: 3 };
+var sparkIndex = 0;
+var activeSpark = null;       // one of sparkCheckpoints, currently shown
+var finalSparkActive = false;
+var finalSparkTaps = 0;
+var finalSparkTriggered = false;
+
+function positionSparkBtn(cp){
+  var pt = videoPointToScreenFor(fireworksVideo, cp.fx, cp.fy);
+  sparkTapBtn.style.left = pt.x + 'px';
+  sparkTapBtn.style.top = pt.y + 'px';
+}
+
+function punchFireworksVideo(){
+  fireworksVideo.classList.remove('punch');
+  void fireworksVideo.offsetWidth; // restart the animation even on rapid consecutive taps
+  fireworksVideo.classList.add('punch');
+}
+
+function hideSparkBtn(){
+  sparkTapBtn.classList.remove('show');
+  activeSpark = null;
+  finalSparkActive = false;
+}
+
+sparkTapBtn.addEventListener('click', function(){
+  punchFireworksVideo();
+  if(finalSparkActive){
+    finalSparkTaps++;
+    if(finalSparkTaps >= finalSparkCheckpoint.tapsNeeded){
+      hideSparkBtn();
+    }
+    // otherwise: stays visible at the exact same spot for the next consecutive tap
+    return;
+  }
+  if(activeSpark){
+    hideSparkBtn();
+  }
+});
+
+function fireworksFrameTick(){
+  if(!fireworksVideo.paused && !fireworksVideo.ended){
+    var t = fireworksVideo.currentTime;
+
+    if(!finalSparkTriggered && t >= finalSparkCheckpoint.time){
+      finalSparkTriggered = true;
+      finalSparkActive = true;
+      finalSparkTaps = 0;
+      activeSpark = null;
+      positionSparkBtn(finalSparkCheckpoint);
+      sparkTapBtn.classList.add('show');
+    } else if(finalSparkActive && t >= finalSparkCheckpoint.time + finalSparkCheckpoint.window){
+      hideSparkBtn(); // window elapsed — whatever taps landed, landed
+    } else if(!finalSparkActive && sparkIndex < sparkCheckpoints.length){
+      var cp = sparkCheckpoints[sparkIndex];
+      if(!activeSpark && t >= cp.time){
+        activeSpark = cp;
+        positionSparkBtn(cp);
+        sparkTapBtn.classList.add('show');
+      } else if(activeSpark === cp && t >= cp.time + cp.window){
+        hideSparkBtn();
+        sparkIndex++;
+      }
+    }
+  }
+  requestAnimationFrame(fireworksFrameTick);
+}
+requestAnimationFrame(fireworksFrameTick);
 
 /* ================= STAGE 3B: CAKE ================= */
 var micStream = null, micRAF = null, candlesExtinguished = false;
