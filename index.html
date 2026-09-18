@@ -348,34 +348,42 @@ button{ -webkit-appearance:none; appearance:none; }
   object-fit:cover;
   display:block;
 }
-#fireworksVideo.punch{ animation:fireworksPunch .25s ease-out; }
+#fireworksVideo.punch{ animation:fireworksPunch .32s cubic-bezier(.36,.07,.19,.97); }
 @keyframes fireworksPunch{
-  0%{ transform:scale(1) translate(0,0); }
-  30%{ transform:scale(1.025) translate(-4px, 2px); }
-  60%{ transform:scale(1.01) translate(3px, -2px); }
-  100%{ transform:scale(1) translate(0,0); }
+  0%{   transform:translate(0,0) rotate(0deg); }
+  10%{  transform:translate(-6px, 3px) rotate(-1deg); }
+  22%{  transform:translate(5px, -4px) rotate(1deg); }
+  34%{  transform:translate(-4px, -3px) rotate(-1.2deg); }
+  46%{  transform:translate(6px, 2px) rotate(1deg); }
+  58%{  transform:translate(-3px, 4px) rotate(-.6deg); }
+  70%{  transform:translate(2px, -2px) rotate(.4deg); }
+  82%{  transform:translate(-1px, 1px) rotate(0deg); }
+  100%{ transform:translate(0,0) rotate(0deg); }
 }
 
+/* Glassy/transparent — deliberately NOT the solid warm dial glyph used for the
+   candle taps (that one's opaque look belongs to the intimate welcome-video
+   moment only). These sit over a busy, bright video and shouldn't visually
+   compete with it or feel heavy. */
 .spark-tap-btn{
   position:absolute;
   z-index:6;
-  width:44px; height:44px;
+  width:46px; height:46px;
   border-radius:50%;
-  background:transparent;
-  border:none;
+  background:rgba(255,255,255,.08);
+  backdrop-filter:blur(3px);
+  -webkit-backdrop-filter:blur(3px);
+  border:1.5px solid rgba(255,255,255,.65);
   box-shadow:
-    0 0 14px 4px rgba(255,178,90,.6),
-    0 0 32px 12px rgba(255,140,50,.36);
+    0 0 10px 2px rgba(255,255,255,.35),
+    0 0 22px 8px rgba(255,200,130,.25),
+    inset 0 0 10px rgba(255,255,255,.2);
   opacity:0;
-  transform:translate(-50%,-50%) scale(.35);
+  transform:translate(-50%,-50%) scale(.4);
   pointer-events:none;
   cursor:pointer;
   padding:0;
   transition:opacity .18s ease, transform .18s ease;
-}
-.spark-tap-btn .dial-svg{
-  width:100%; height:100%; display:block;
-  filter:drop-shadow(0 0 8px rgba(255,180,90,.95));
 }
 .spark-tap-btn.show{
   opacity:1;
@@ -392,13 +400,15 @@ button{ -webkit-appearance:none; appearance:none; }
 @keyframes sparkPulse{
   0%, 100%{
     box-shadow:
-      0 0 14px 4px rgba(255,178,90,.6),
-      0 0 32px 12px rgba(255,140,50,.36);
+      0 0 10px 2px rgba(255,255,255,.35),
+      0 0 22px 8px rgba(255,200,130,.25),
+      inset 0 0 10px rgba(255,255,255,.2);
   }
   50%{
     box-shadow:
-      0 0 22px 8px rgba(255,214,145,.95),
-      0 0 48px 18px rgba(255,164,75,.6);
+      0 0 16px 4px rgba(255,255,255,.55),
+      0 0 34px 13px rgba(255,200,130,.4),
+      inset 0 0 14px rgba(255,255,255,.3);
   }
 }
 
@@ -606,7 +616,7 @@ canvas#flowerCanvas{ position:absolute; inset:0; width:100%; height:100%; displa
   </div>
 </div>
 
-<audio id="bgMusic" loop preload="auto">
+<audio id="bgMusic" loop preload="none">
   <source src="wish-loop.mp3" type="audio/mpeg">
 </audio>
 
@@ -637,7 +647,7 @@ canvas#flowerCanvas{ position:absolute; inset:0; width:100%; height:100%; displa
 
 <!-- STAGE 5: FIREWORKS VIDEO (right/correct fork path) -->
 <div class="fireworks-stage-wrap" id="fireworksStageWrap">
-  <video id="fireworksVideo" playsinline preload="auto">
+  <video id="fireworksVideo" playsinline preload="none">
     <source src="fireworks.mp4" type="video/mp4">
   </video>
   <button type="button" class="spark-tap-btn" id="sparkTapBtn" aria-label="اضغطي"></button>
@@ -764,7 +774,6 @@ var forkLeftBtn = document.getElementById('forkLeftBtn');
 var fireworksStageWrap = document.getElementById('fireworksStageWrap');
 var fireworksVideo = document.getElementById('fireworksVideo');
 var sparkTapBtn = document.getElementById('sparkTapBtn');
-sparkTapBtn.innerHTML = buildDialSvgMarkup();
 var placeholderStageWrap = document.getElementById('placeholderStageWrap');
 var placeholderText = document.getElementById('placeholderText');
 var cakeStage = document.getElementById('cakeStage');
@@ -814,18 +823,30 @@ var ambientChords = [
   [261.63, 329.63, 392.00, 493.88],
   [164.81, 196.00, 246.94, 329.63]
 ];
+var ambientTimeoutId = null;
 function scheduleAmbient(){
   var now = audioCtx.currentTime;
   var chord = ambientChords[chordStep % ambientChords.length];
   chord.forEach(function(freq, i){ playPadNote(freq, now + i * 0.18, 4.6); });
   chordStep++;
-  setTimeout(scheduleAmbient, 4200);
+  ambientTimeoutId = setTimeout(scheduleAmbient, 4200);
 }
 function startGeneratedAmbient(){
   if(ambientStarted) return;
   ambientStarted = true;
   ensureAudioContext();
   scheduleAmbient();
+}
+function stopGeneratedAmbient(fadeSeconds){
+  if(!ambientStarted) return;
+  ambientStarted = false;
+  if(ambientTimeoutId){ clearTimeout(ambientTimeoutId); ambientTimeoutId = null; }
+  if(masterGain && audioCtx){
+    var now = audioCtx.currentTime;
+    masterGain.gain.cancelScheduledValues(now);
+    masterGain.gain.setValueAtTime(masterGain.gain.value, now);
+    masterGain.gain.linearRampToValueAtTime(0.0001, now + (fadeSeconds || 0.9));
+  }
 }
 
 function unlockAudio(){
@@ -862,6 +883,7 @@ function fadeOutBgMusic(durationMs){
     }
   }
   bgMusicFadeRAF = requestAnimationFrame(step);
+  stopGeneratedAmbient(durationMs / 1000);
 }
 
 /* ================= STAGE 1 -> 2 ================= */
@@ -1276,6 +1298,7 @@ function goToForkStage(){
   wishStageWrap.classList.remove('show');
   setTimeout(function(){
     forkStageWrap.classList.add('show');
+    fireworksVideo.load(); // start buffering now, while she's deciding — not at the tap moment
   }, 500);
 }
 
