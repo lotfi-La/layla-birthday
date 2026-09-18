@@ -224,6 +224,33 @@ button{ -webkit-appearance:none; appearance:none; }
   outline:2px solid var(--gold-light); outline-offset:3px;
 }
 
+/* ================= Stage 2: WISH (fixed fade overlay, shown right after welcome video) ================= */
+.wish-stage-wrap{
+  position:fixed; inset:0; z-index:150;
+  display:flex; align-items:center; justify-content:center;
+  padding:24px;
+  padding-top:max(24px, env(safe-area-inset-top));
+  padding-bottom:max(24px, env(safe-area-inset-bottom));
+  background:var(--bg);
+  opacity:0;
+  pointer-events:none;
+  transition:opacity 1s ease;
+}
+.wish-stage-wrap.show{ opacity:1; pointer-events:auto; }
+.wish-instruction{ position:static; margin-bottom:22px; pointer-events:auto; }
+.wish-sent-msg{
+  margin-top:18px;
+  min-height:1.3em;
+  color:var(--gold-light);
+  font-size:.95rem;
+  text-align:center;
+  opacity:0;
+  transform:translateY(6px);
+  transition:opacity .6s ease, transform .6s ease;
+}
+.wish-sent-msg.show{ opacity:1; transform:translateY(0); }
+.wish-form.sending .wish-btn{ opacity:.6; pointer-events:none; }
+
 /* ================= Stage 2: garden ================= */
 .instruction-text{
   position:absolute;
@@ -413,6 +440,18 @@ canvas#flowerCanvas{ position:absolute; inset:0; width:100%; height:100%; displa
   <source src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=piano-moment-114876.mp3" type="audio/mpeg">
 </audio>
 
+<!-- STAGE 2: WISH INPUT — appears directly after the welcome video, before the celebration fork -->
+<div class="wish-stage-wrap" id="wishStageWrap">
+  <div class="substage" id="wishStage">
+    <p class="instruction-text wish-instruction">قبل ما نكمل... شنو تتمنّي؟ 🕯️</p>
+    <form class="wish-form" id="wishForm">
+      <input type="text" id="wishInput" class="wish-input" placeholder="اكتبي أمنيتك هنا..." aria-label="اكتبي أمنيتك هنا" autocomplete="off">
+      <button type="submit" class="wish-btn" id="wishSubmitBtn">تأكيد الأمنية ✨</button>
+    </form>
+    <p class="wish-sent-msg" id="wishSentMsg">تم إرسال أمنيتك بصمت... ✨</p>
+  </div>
+</div>
+
 <div id="stagesViewport">
   <div id="stagesTrack">
 
@@ -426,13 +465,6 @@ canvas#flowerCanvas{ position:absolute; inset:0; width:100%; height:100%; displa
       <div class="titles-block">
         <h2 class="title-happy" dir="ltr">HAPPY BIRTHDAY</h2>
         <h1 class="title-name" dir="ltr">LAYLA</h1>
-      </div>
-
-      <div class="substage" id="wishStage">
-        <form class="wish-form" id="wishForm">
-          <input type="text" id="wishInput" class="wish-input" placeholder="اكتبي أمنيتك هنا..." aria-label="اكتبي أمنيتك هنا" autocomplete="off">
-          <button type="submit" class="wish-btn">تأكيد الأمنية ✨</button>
-        </form>
       </div>
 
       <div class="substage" id="cakeStage">
@@ -525,8 +557,11 @@ var canvas = document.getElementById('flowerCanvas');
 var ctx = canvas.getContext('2d');
 var gardenLayer = document.getElementById('gardenLayer');
 var wishStage = document.getElementById('wishStage');
+var wishStageWrap = document.getElementById('wishStageWrap');
 var wishForm = document.getElementById('wishForm');
 var wishInput = document.getElementById('wishInput');
+var wishSubmitBtn = document.getElementById('wishSubmitBtn');
+var wishSentMsg = document.getElementById('wishSentMsg');
 var cakeStage = document.getElementById('cakeStage');
 var cakeInner = document.getElementById('cakeInner');
 var cakeInstruction = document.getElementById('cakeInstruction');
@@ -609,6 +644,8 @@ function proceedPastIntro(){
   introScreen.classList.add('intro-hide');
   setTimeout(function(){ introScreen.style.display = 'none'; }, 900);
   unlockAudio();
+  wishStageWrap.classList.add('show');
+  setTimeout(function(){ wishInput.focus({ preventScroll:true }); }, 950);
 }
 
 startBtn.addEventListener('click', function(){
@@ -957,33 +994,37 @@ function goToStage3(){
   stagesTrack.classList.add('to-stage3');
 }
 
-/* ================= STAGE 3A: WISH ================= */
-function sendWishSecretly(wish){
-  if(!wish) return;
-  var WISH_ENDPOINT = 'https://formspree.io/f/YOUR_FORM_ID'; // TODO: replace with your Formspree endpoint (or swap for an EmailJS call)
-  fetch(WISH_ENDPOINT, {
+/* ================= STAGE 2: WISH ================= */
+var WISH_ENDPOINT = 'https://formspree.io/f/xdekkoze';
+
+function sendWish(wish){
+  return fetch(WISH_ENDPOINT, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
     body: JSON.stringify({ wish: wish, page: 'Layla Birthday Edition', sentAt: new Date().toISOString() })
-  }).catch(function(){});
+  }).then(function(res){
+    if(!res.ok) throw new Error('send failed');
+  });
 }
 
 wishForm.addEventListener('submit', function(e){
   e.preventDefault();
   var wish = wishInput.value.trim();
-  sendWishSecretly(wish);
-  wishStage.classList.add('substage-hide');
-  setTimeout(function(){
-    wishStage.style.display = 'none';
-    cakeStage.style.display = 'flex';
-    requestAnimationFrame(function(){
-      requestAnimationFrame(function(){
-        cakeStage.classList.add('substage-show');
-        cakeInner.classList.add('cake-in');
-        setupMicBlowDetection();
-      });
-    });
-  }, 480);
+  if(!wish){ wishInput.focus(); return; }
+
+  wishForm.classList.add('sending');
+  sendWish(wish).then(function(){
+    wishSentMsg.textContent = 'تم إرسال أمنيتك بصمت... ✨';
+    wishSentMsg.classList.add('show');
+    wishInput.value = '';
+    wishInput.disabled = true;
+    wishSubmitBtn.disabled = true;
+  }).catch(function(){
+    wishSentMsg.textContent = 'ما قدرناش نرسلوها الآن، جرّبي مرة أخرى 🌙';
+    wishSentMsg.classList.add('show');
+  }).finally(function(){
+    wishForm.classList.remove('sending');
+  });
 });
 
 /* ================= STAGE 3B: CAKE ================= */
