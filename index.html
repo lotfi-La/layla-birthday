@@ -447,6 +447,22 @@ button{ -webkit-appearance:none; appearance:none; }
   display:block;
 }
 
+/* ================= LEFT FORK PATH: "celebrate alone" punishment videos ================= */
+.alone-stage-wrap{
+  position:fixed; inset:0; z-index:135;
+  background:#000;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity 1s ease;
+  overflow:hidden;
+}
+.alone-stage-wrap.show{ opacity:1; pointer-events:auto; }
+.alone-stage-wrap video{
+  width:100%; height:100%;
+  object-fit:cover;
+  display:block;
+}
+
 /* ================= TEMPORARY placeholder for unfinished fork paths ================= */
 .placeholder-stage-wrap{
   position:fixed; inset:0; z-index:145;
@@ -710,6 +726,13 @@ canvas#flowerCanvas{ position:absolute; inset:0; width:100%; height:100%; displa
 </div>
 <div class="launch-flash" id="launchFlash"></div>
 
+<!-- LEFT FORK PATH: "celebrate alone" — 1st attempt punishment video -->
+<div class="alone-stage-wrap" id="aloneStageWrap">
+  <video id="aloneVideo1" playsinline preload="none">
+    <source src="alone1.mp4" type="video/mp4">
+  </video>
+</div>
+
 
 <!-- TEMPORARY placeholder screen for whichever fork path is chosen — will be replaced once each stage is actually built -->
 <div class="placeholder-stage-wrap" id="placeholderStageWrap">
@@ -830,6 +853,9 @@ var forkRightBtn = document.getElementById('forkRightBtn');
 var forkLeftBtn = document.getElementById('forkLeftBtn');
 var fireworksStageWrap = document.getElementById('fireworksStageWrap');
 var fireworksVideo = document.getElementById('fireworksVideo');
+var aloneStageWrap = document.getElementById('aloneStageWrap');
+var aloneVideo1 = document.getElementById('aloneVideo1');
+var leftPickCount = 0;
 var launchStageWrap = document.getElementById('launchStageWrap');
 var placeholderStageWrap = document.getElementById('placeholderStageWrap');
 var placeholderText = document.getElementById('placeholderText');
@@ -1383,6 +1409,7 @@ function goToForkStage(){
   setTimeout(function(){
     forkStageWrap.classList.add('show');
     fireworksVideo.load(); // start buffering now, while she's deciding — not at the tap moment
+    aloneVideo1.load();
   }, 500);
 }
 
@@ -1413,10 +1440,34 @@ forkRightBtn.addEventListener('click', function(){
   goToLaunchStage(); // loop music now keeps playing through the launch scene — faded out later, right as the video starts
 });
 
+/* ================= FORK LEFT PATH: "celebrate alone" ================= */
+function playAloneVideo1(){
+  stopLoopMusicHard();
+  aloneStageWrap.classList.add('show');
+  var p = aloneVideo1.play();
+  if(p && p.catch) p.catch(function(){});
+}
+
+/* الفيديو ينتهي فتعود هي لشاشة المفترق لتختار من جديد (وليس مسارًا نهائيًا كفيديو الألعاب النارية) —
+   لذا نعيد تشغيل موسيقى الحلقة عند العودة، بدل تركها صامتة لبقية التجربة. */
+aloneVideo1.addEventListener('ended', function(){
+  aloneStageWrap.classList.remove('show');
+  setTimeout(function(){
+    forkStageWrap.classList.add('show');
+    startLoopMusic();
+  }, 500);
+});
+
 forkLeftBtn.addEventListener('click', function(){
+  leftPickCount++;
   fadeOutBgMusic();
-  // TODO: once 4105.mp4 is sent, replace this with the real "kick" video + the stubbornness counter logic
-  showPlaceholder('🎬 هنا سيُشغَّل لاحقاً فيديو الطرد (لم يُرسَل بعد)');
+  if(leftPickCount === 1){
+    forkStageWrap.classList.remove('show');
+    setTimeout(playAloneVideo1, 500);
+  } else {
+    // TODO: المحاولة الثانية = فيديو أقسى (لم يُرسَل بعد)، وبعدها إخفاء الزر الأيسر نهائيًا حسب القرار المتخذ
+    showPlaceholder('🎬 المحاولة الثانية: هنا سيُشغَّل الفيديو الأقسى (لم يُرسَل بعد)');
+  }
 });
 
 /* ================= STAGE 5a: FIREWORK LAUNCH MINI-SCENE =================
