@@ -979,6 +979,7 @@ function proceedPastIntro(){
 
 startBtn.addEventListener('click', function(){
   ensureAudioContext();
+  fetchLoopBuffer(); // تحميل/فك تشفير موسيقى الحلقة الآن، أثناء تشغيل فيديو الترحيب، بدل انتظار نهايته — يمنع تأخر الموسيقى المحسوس عند بدء مرحلة التمنّي
   introCard.classList.add('card-hide');
   welcomeVideo.muted = false;
   welcomeVideo.classList.add('video-visible');
@@ -1095,7 +1096,8 @@ function hideCandleTapBtn(){
    second — coarse enough that currentTime can already be past the flash/flame by
    the time it fires). The video pauses instantly at each checkpoint, no ramp. */
 function candleFrameTick(){
-  if(!welcomeVideo.paused && !welcomeVideo.ended){
+  if(welcomeVideo.ended) return; // الفيديو انتهى نهائيًا — لا داعٍ لمتابعة الحلقة إلى الأبد
+  if(!welcomeVideo.paused){
     var t = welcomeVideo.currentTime;
     for(var i = 0; i < candleCheckpoints.length; i++){
       var cp = candleCheckpoints[i];
@@ -1333,7 +1335,10 @@ function renderGarden(){
   flowers.forEach(function(f){ f.update(); f.draw(); });
   requestAnimationFrame(renderGarden);
 }
-renderGarden();
+/* DISABLED: مرحلة الورود أصبحت فيديو، لم تعد بحاجة لحلقة الرسم على canvas.
+   كانت renderGarden() تعمل بلا توقف من لحظة تحميل الصفحة (حتى قبل ظهور
+   المرحلة فعليًا)، وهذا كان السبب الرئيسي للتعليق المتكرر وتأخر الموسيقى. */
+// renderGarden();
 
 function goToStage3(){
   clearTypewriter();
