@@ -1336,17 +1336,18 @@ forkLeftBtn.addEventListener('click', function(){
 
 /* ================= STAGE 5: FIREWORKS SPARK TAPS =================
    Timed to the strongest simultaneous audio-beat + visual-burst moments
-   (measured directly off this video's own waveform + frame brightness),
-   per plan agreed with Lotfi. The video never pauses for these — they're
-   a light, fast, energetic overlay, not a hard gate like the candle taps. */
+   (measured directly off this video's own waveform + frame brightness).
+   Same mechanic as the candle taps now: the video genuinely pauses at
+   each checkpoint and waits — no timeout, no restart — she is really
+   the one igniting each burst. */
 var sparkCheckpoints = [
-  { time: 2.8,  fx: 0.55, fy: 0.55, window: 1.3 },
-  { time: 7.9,  fx: 0.40, fy: 0.53, window: 1.3 },
-  { time: 11.5, fx: 0.42, fy: 0.52, window: 1.3 },
-  { time: 16.5, fx: 0.45, fy: 0.57, window: 1.3 },
-  { time: 19.5, fx: 0.15, fy: 0.38, window: 1.3 }
+  { time: 2.8,  fx: 0.55, fy: 0.55 },
+  { time: 7.9,  fx: 0.40, fy: 0.53 },
+  { time: 11.5, fx: 0.42, fy: 0.52 },
+  { time: 16.5, fx: 0.45, fy: 0.57 },
+  { time: 19.5, fx: 0.15, fy: 0.38 }
 ];
-var finalSparkCheckpoint = { time: 23.1, fx: 0.55, fy: 0.68, window: 4.0, tapsNeeded: 3 };
+var finalSparkCheckpoint = { time: 23.1, fx: 0.55, fy: 0.68, tapsNeeded: 3 };
 var sparkIndex = 0;
 var activeSpark = null;       // one of sparkCheckpoints, currently shown
 var finalSparkActive = false;
@@ -1368,7 +1369,11 @@ function punchFireworksVideo(){
 function hideSparkBtn(){
   sparkTapBtn.classList.remove('show');
   activeSpark = null;
-  finalSparkActive = false;
+}
+
+function resumeFireworksVideo(){
+  var p = fireworksVideo.play();
+  if(p && p.catch) p.catch(function(){});
 }
 
 sparkTapBtn.addEventListener('click', function(){
@@ -1377,13 +1382,16 @@ sparkTapBtn.addEventListener('click', function(){
     finalSparkTaps++;
     if(finalSparkTaps >= finalSparkCheckpoint.tapsNeeded){
       hideSparkBtn();
+      finalSparkActive = false;
+      resumeFireworksVideo();
     }
-    // otherwise: stays visible at the exact same spot for the next consecutive tap
+    // otherwise: stays visible, paused, at the exact same spot for the next consecutive tap
     return;
   }
   if(activeSpark){
     hideSparkBtn();
-    sparkIndex++; // advance to the next checkpoint now that this one was tapped successfully
+    sparkIndex++; // advance to the next checkpoint now that this one was tapped
+    resumeFireworksVideo();
   }
 });
 
@@ -1395,20 +1403,16 @@ function fireworksFrameTick(){
       finalSparkTriggered = true;
       finalSparkActive = true;
       finalSparkTaps = 0;
-      activeSpark = null;
+      fireworksVideo.pause();
       positionSparkBtn(finalSparkCheckpoint);
       sparkTapBtn.classList.add('show');
-    } else if(finalSparkActive && t >= finalSparkCheckpoint.time + finalSparkCheckpoint.window){
-      hideSparkBtn(); // window elapsed — whatever taps landed, landed
     } else if(!finalSparkActive && sparkIndex < sparkCheckpoints.length){
       var cp = sparkCheckpoints[sparkIndex];
-      if(!activeSpark && t >= cp.time){
+      if(t >= cp.time){
         activeSpark = cp;
+        fireworksVideo.pause();
         positionSparkBtn(cp);
         sparkTapBtn.classList.add('show');
-      } else if(activeSpark === cp && t >= cp.time + cp.window){
-        hideSparkBtn();
-        sparkIndex++;
       }
     }
   }
