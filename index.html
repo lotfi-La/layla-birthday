@@ -334,6 +334,65 @@ button{ -webkit-appearance:none; appearance:none; }
   font-weight:500;
 }
 
+/* ================= Stage 5a: FIREWORK LAUNCH (pre-video mini-scene) ================= */
+.launch-stage-wrap{
+  position:fixed; inset:0; z-index:136;
+  background:#000;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity 1s ease;
+  overflow:hidden;
+  touch-action:none;
+}
+.launch-stage-wrap.show{ opacity:1; pointer-events:auto; }
+.launch-hint{
+  position:absolute; top:10%; left:0; right:0;
+  text-align:center;
+  color:var(--gold-light);
+  font-weight:600;
+  font-size:clamp(.95rem, 4.2vw, 1.15rem);
+  text-shadow:0 2px 14px rgba(0,0,0,.9);
+  padding:0 20px;
+  transition:opacity .4s ease;
+}
+.launch-stage-wrap.all-launched .launch-hint{ opacity:0; }
+.launch-firework{
+  position:absolute;
+  left:var(--lx); top:var(--ly);
+  width:15vw; max-width:64px; min-width:38px;
+  transform:translate(-50%,-50%);
+  filter:drop-shadow(0 0 6px rgba(201,164,92,.75)) drop-shadow(0 0 16px rgba(201,164,92,.4));
+  animation:launchIdlePulse 1.6s ease-in-out infinite;
+}
+.launch-firework-svg{ width:100%; height:auto; display:block; }
+@keyframes launchIdlePulse{
+  0%, 100%{ filter:drop-shadow(0 0 6px rgba(201,164,92,.75)) drop-shadow(0 0 16px rgba(201,164,92,.4)); }
+  50%{ filter:drop-shadow(0 0 10px rgba(236,217,168,.95)) drop-shadow(0 0 26px rgba(201,164,92,.65)); }
+}
+.launch-firework.launched{
+  animation:fireworkLaunch .7s cubic-bezier(.2,.7,.3,1) forwards;
+  pointer-events:none;
+}
+@keyframes fireworkLaunch{
+  0%{ transform:translate(-50%,-50%) scale(1); opacity:1; }
+  70%{ opacity:1; }
+  100%{ transform:translate(-50%, calc(-50% - 92vh)) scale(.7); opacity:0; }
+}
+.launch-spark-burst{
+  position:absolute;
+  left:0; top:0;
+  width:6px; height:6px;
+  border-radius:50%;
+  background:var(--gold-light);
+  box-shadow:0 0 8px 3px rgba(236,217,168,.9);
+  transform:translate(-50%,-50%);
+  animation:launchSparkOut .55s ease-out forwards;
+}
+@keyframes launchSparkOut{
+  0%{ transform:translate(-50%,-50%) translate(0,0) scale(1); opacity:1; }
+  100%{ transform:translate(-50%,-50%) translate(var(--dx), var(--dy)) scale(.2); opacity:0; }
+}
+
 /* ================= Stage 5: FIREWORKS VIDEO (right fork path) ================= */
 .fireworks-stage-wrap{
   position:fixed; inset:0; z-index:135;
@@ -348,71 +407,6 @@ button{ -webkit-appearance:none; appearance:none; }
   width:100%; height:100%;
   object-fit:cover;
   display:block;
-  transform:scale(1.08); /* slight overscan so the punch shake never reveals the black edge behind it */
-  transform-origin:center center;
-}
-#fireworksVideo.punch{ animation:fireworksPunch .32s cubic-bezier(.36,.07,.19,.97); }
-@keyframes fireworksPunch{
-  0%{   transform:scale(1.08) translate(0,0) rotate(0deg); }
-  10%{  transform:scale(1.08) translate(-6px, 3px) rotate(-1deg); }
-  22%{  transform:scale(1.08) translate(5px, -4px) rotate(1deg); }
-  34%{  transform:scale(1.08) translate(-4px, -3px) rotate(-1.2deg); }
-  46%{  transform:scale(1.08) translate(6px, 2px) rotate(1deg); }
-  58%{  transform:scale(1.08) translate(-3px, 4px) rotate(-.6deg); }
-  70%{  transform:scale(1.08) translate(2px, -2px) rotate(.4deg); }
-  82%{  transform:scale(1.08) translate(-1px, 1px) rotate(0deg); }
-  100%{ transform:scale(1.08) translate(0,0) rotate(0deg); }
-}
-
-/* Glassy/transparent — deliberately NOT the solid warm dial glyph used for the
-   candle taps (that one's opaque look belongs to the intimate welcome-video
-   moment only). These sit over a busy, bright video and shouldn't visually
-   compete with it or feel heavy. */
-.spark-tap-btn{
-  position:absolute;
-  z-index:6;
-  width:46px; height:46px;
-  border-radius:50%;
-  background:rgba(255,255,255,.08);
-  backdrop-filter:blur(3px);
-  -webkit-backdrop-filter:blur(3px);
-  border:1.5px solid rgba(255,255,255,.65);
-  box-shadow:
-    0 0 10px 2px rgba(255,255,255,.35),
-    0 0 22px 8px rgba(255,200,130,.25),
-    inset 0 0 10px rgba(255,255,255,.2);
-  opacity:0;
-  transform:translate(-50%,-50%) scale(.4);
-  pointer-events:none;
-  cursor:pointer;
-  padding:0;
-  transition:opacity .18s ease, transform .18s ease;
-}
-.spark-tap-btn.show{
-  opacity:1;
-  transform:translate(-50%,-50%) scale(1);
-  pointer-events:auto;
-  animation:sparkShake .55s ease-in-out infinite, sparkPulse .6s ease-in-out infinite;
-}
-@keyframes sparkShake{
-  0%, 100%{ transform:translate(-50%,-50%) scale(1) rotate(0deg); }
-  25%{ transform:translate(calc(-50% - 3px), calc(-50% + 1px)) scale(1.06) rotate(-6deg); }
-  50%{ transform:translate(-50%,-50%) scale(1) rotate(0deg); }
-  75%{ transform:translate(calc(-50% + 3px), calc(-50% - 1px)) scale(1.06) rotate(6deg); }
-}
-@keyframes sparkPulse{
-  0%, 100%{
-    box-shadow:
-      0 0 10px 2px rgba(255,255,255,.35),
-      0 0 22px 8px rgba(255,200,130,.25),
-      inset 0 0 10px rgba(255,255,255,.2);
-  }
-  50%{
-    box-shadow:
-      0 0 16px 4px rgba(255,255,255,.55),
-      0 0 34px 13px rgba(255,200,130,.4),
-      inset 0 0 14px rgba(255,255,255,.3);
-  }
 }
 
 /* ================= TEMPORARY placeholder for unfinished fork paths ================= */
@@ -619,10 +613,6 @@ canvas#flowerCanvas{ position:absolute; inset:0; width:100%; height:100%; displa
   </div>
 </div>
 
-<audio id="bgMusic" loop preload="none">
-  <source src="wish-loop.mp3" type="audio/mpeg">
-</audio>
-
 <!-- STAGE 2: WISH INPUT — appears directly after the welcome video, before the celebration fork -->
 <div class="wish-stage-wrap" id="wishStageWrap">
   <div class="substage" id="wishStage">
@@ -648,13 +638,66 @@ canvas#flowerCanvas{ position:absolute; inset:0; width:100%; height:100%; displa
   </div>
 </div>
 
+<!-- STAGE 5a: FIREWORK LAUNCH (pre-video mini-scene, right/correct fork path) -->
+<div class="launch-stage-wrap" id="launchStageWrap">
+  <p class="launch-hint">مرّري إصبعك عبر كل شعلة لتشعليها</p>
+  <div class="launch-firework" data-launched="0" style="--lx:14%; --ly:76%;">
+    <svg class="launch-firework-svg" viewBox="0 0 60 100" xmlns="http://www.w3.org/2000/svg">
+      <path d="M30 4 C40 22 45 40 45 58 C45 74 38 84 30 92 C22 84 15 74 15 58 C15 40 20 22 30 4Z" fill="url(#lfGrad)"/>
+      <circle cx="30" cy="42" r="6" fill="var(--bg)" opacity=".35"/>
+      <path d="M15 58 L4 78" stroke="var(--gold)" stroke-width="3" stroke-linecap="round"/>
+      <path d="M45 58 L56 78" stroke="var(--gold)" stroke-width="3" stroke-linecap="round"/>
+    </svg>
+  </div>
+  <div class="launch-firework" data-launched="0" style="--lx:31%; --ly:86%;">
+    <svg class="launch-firework-svg" viewBox="0 0 60 100" xmlns="http://www.w3.org/2000/svg">
+      <path d="M30 4 C40 22 45 40 45 58 C45 74 38 84 30 92 C22 84 15 74 15 58 C15 40 20 22 30 4Z" fill="url(#lfGrad)"/>
+      <circle cx="30" cy="42" r="6" fill="var(--bg)" opacity=".35"/>
+      <path d="M15 58 L4 78" stroke="var(--gold)" stroke-width="3" stroke-linecap="round"/>
+      <path d="M45 58 L56 78" stroke="var(--gold)" stroke-width="3" stroke-linecap="round"/>
+    </svg>
+  </div>
+  <div class="launch-firework" data-launched="0" style="--lx:50%; --ly:80%;">
+    <svg class="launch-firework-svg" viewBox="0 0 60 100" xmlns="http://www.w3.org/2000/svg">
+      <path d="M30 4 C40 22 45 40 45 58 C45 74 38 84 30 92 C22 84 15 74 15 58 C15 40 20 22 30 4Z" fill="url(#lfGrad)"/>
+      <circle cx="30" cy="42" r="6" fill="var(--bg)" opacity=".35"/>
+      <path d="M15 58 L4 78" stroke="var(--gold)" stroke-width="3" stroke-linecap="round"/>
+      <path d="M45 58 L56 78" stroke="var(--gold)" stroke-width="3" stroke-linecap="round"/>
+    </svg>
+  </div>
+  <div class="launch-firework" data-launched="0" style="--lx:69%; --ly:86%;">
+    <svg class="launch-firework-svg" viewBox="0 0 60 100" xmlns="http://www.w3.org/2000/svg">
+      <path d="M30 4 C40 22 45 40 45 58 C45 74 38 84 30 92 C22 84 15 74 15 58 C15 40 20 22 30 4Z" fill="url(#lfGrad)"/>
+      <circle cx="30" cy="42" r="6" fill="var(--bg)" opacity=".35"/>
+      <path d="M15 58 L4 78" stroke="var(--gold)" stroke-width="3" stroke-linecap="round"/>
+      <path d="M45 58 L56 78" stroke="var(--gold)" stroke-width="3" stroke-linecap="round"/>
+    </svg>
+  </div>
+  <div class="launch-firework" data-launched="0" style="--lx:86%; --ly:76%;">
+    <svg class="launch-firework-svg" viewBox="0 0 60 100" xmlns="http://www.w3.org/2000/svg">
+      <path d="M30 4 C40 22 45 40 45 58 C45 74 38 84 30 92 C22 84 15 74 15 58 C15 40 20 22 30 4Z" fill="url(#lfGrad)"/>
+      <circle cx="30" cy="42" r="6" fill="var(--bg)" opacity=".35"/>
+      <path d="M15 58 L4 78" stroke="var(--gold)" stroke-width="3" stroke-linecap="round"/>
+      <path d="M45 58 L56 78" stroke="var(--gold)" stroke-width="3" stroke-linecap="round"/>
+    </svg>
+  </div>
+  <svg width="0" height="0" style="position:absolute">
+    <defs>
+      <linearGradient id="lfGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="var(--gold-light)"/>
+        <stop offset="100%" stop-color="var(--gold)"/>
+      </linearGradient>
+    </defs>
+  </svg>
+</div>
+
 <!-- STAGE 5: FIREWORKS VIDEO (right/correct fork path) -->
 <div class="fireworks-stage-wrap" id="fireworksStageWrap">
   <video id="fireworksVideo" playsinline preload="none">
     <source src="fireworks.mp4" type="video/mp4">
   </video>
-  <button type="button" class="spark-tap-btn" id="sparkTapBtn" aria-label="اضغطي"></button>
 </div>
+
 
 <!-- TEMPORARY placeholder screen for whichever fork path is chosen — will be replaced once each stage is actually built -->
 <div class="placeholder-stage-wrap" id="placeholderStageWrap">
@@ -759,7 +802,6 @@ var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matche
 /* ---------- element refs ---------- */
 var introScreen = document.getElementById('introScreen');
 var startBtn = document.getElementById('startBtn');
-var bgMusic = document.getElementById('bgMusic');
 var stagesTrack = document.getElementById('stagesTrack');
 var stage2 = document.getElementById('stage2');
 var canvas = document.getElementById('flowerCanvas');
@@ -776,7 +818,7 @@ var forkRightBtn = document.getElementById('forkRightBtn');
 var forkLeftBtn = document.getElementById('forkLeftBtn');
 var fireworksStageWrap = document.getElementById('fireworksStageWrap');
 var fireworksVideo = document.getElementById('fireworksVideo');
-var sparkTapBtn = document.getElementById('sparkTapBtn');
+var launchStageWrap = document.getElementById('launchStageWrap');
 var placeholderStageWrap = document.getElementById('placeholderStageWrap');
 var placeholderText = document.getElementById('placeholderText');
 var cakeStage = document.getElementById('cakeStage');
@@ -854,39 +896,61 @@ function stopGeneratedAmbient(fadeSeconds){
 
 function unlockAudio(){
   ensureAudioContext();
-  var resolved = false;
-  function useFallback(){ if(!resolved){ resolved = true; startGeneratedAmbient(); } }
-  bgMusic.addEventListener('playing', function(){ resolved = true; }, { once:true });
-  bgMusic.addEventListener('error', useFallback, { once:true });
-  try{
-    var p = bgMusic.play();
-    if(p && p.catch) p.catch(useFallback);
-  }catch(e){ useFallback(); }
-  setTimeout(function(){ if(!resolved) useFallback(); }, 1500);
+  startLoopMusic();
 }
 
-/* Fades bgMusic out from whatever point the loop happens to be at when called —
-   we never know how fast she'll move through the wish/fork stages, so this can't
-   assume a fixed timeline. The next stage's own music should fade IN separately
-   (handled on that stage's side) so the handoff feels smooth either way. */
-var bgMusicFadeRAF = null;
+/* ---------- wish/fork background loop (Web Audio, gapless) ----------
+   The old <audio loop> element re-seeks to 0 every repeat, which exposes
+   a small but audible click/gap at the seam (from MP3 encoder padding +
+   the seek itself). A Web Audio buffer source loops sample-accurately,
+   so this removes that click entirely. */
+var loopBuffer = null, loopBufferPromise = null, loopSource = null, loopGainNode = null;
+
+function fetchLoopBuffer(){
+  if(loopBufferPromise) return loopBufferPromise;
+  loopBufferPromise = fetch('wish-loop.mp3')
+    .then(function(r){ return r.arrayBuffer(); })
+    .then(function(ab){ return audioCtx.decodeAudioData(ab); })
+    .then(function(buf){ loopBuffer = buf; return buf; });
+  return loopBufferPromise;
+}
+
+function startLoopMusic(){
+  if(!loopGainNode){
+    loopGainNode = audioCtx.createGain();
+    loopGainNode.gain.value = 1;
+    loopGainNode.connect(audioCtx.destination);
+  }
+  fetchLoopBuffer().then(function(buf){
+    if(loopSource) return; // already started — avoid double-triggering on a race
+    loopSource = audioCtx.createBufferSource();
+    loopSource.buffer = buf;
+    loopSource.loop = true;
+    loopSource.connect(loopGainNode);
+    loopSource.start(0);
+  }).catch(function(){
+    startGeneratedAmbient(); // file missing/undecodable — fall back to the generated pad
+  });
+}
+
+function stopLoopMusicHard(){
+  if(loopSource){ try{ loopSource.stop(); }catch(e){} loopSource = null; }
+}
+
+/* Fades the loop out from whatever point it happens to be at when called —
+   we never know how fast she'll move through the wish/fork stages. The
+   next stage's own audio fades IN separately (handled on that stage's side)
+   so the handoff feels smooth either way. */
 function fadeOutBgMusic(durationMs){
   durationMs = durationMs || 900;
-  if(bgMusicFadeRAF) cancelAnimationFrame(bgMusicFadeRAF);
-  var startVol = bgMusic.volume;
-  var startTime = performance.now();
-  function step(now){
-    var p = Math.min(1, (now - startTime) / durationMs);
-    bgMusic.volume = startVol * (1 - p);
-    if(p < 1){
-      bgMusicFadeRAF = requestAnimationFrame(step);
-    }else{
-      bgMusic.pause();
-      bgMusic.volume = startVol; // restored so a future fade-in/replay starts at full volume
-    }
+  if(loopGainNode && audioCtx){
+    var now = audioCtx.currentTime;
+    loopGainNode.gain.cancelScheduledValues(now);
+    loopGainNode.gain.setValueAtTime(loopGainNode.gain.value, now);
+    loopGainNode.gain.linearRampToValueAtTime(0.0001, now + durationMs / 1000);
   }
-  bgMusicFadeRAF = requestAnimationFrame(step);
   stopGeneratedAmbient(durationMs / 1000);
+  setTimeout(stopLoopMusicHard, durationMs + 50); // nothing lingers once the fade finishes
 }
 
 /* ================= STAGE 1 -> 2 ================= */
@@ -1313,19 +1377,29 @@ function showPlaceholder(text){
   }, 500);
 }
 
-/* ================= STAGE 5: FIREWORKS VIDEO ================= */
-function goToFireworksStage(){
+/* ================= STAGE 5a -> 5: FORK RIGHT PATH ================= */
+function playFireworksVideoNow(){
+  stopLoopMusicHard(); // hard backstop — guarantees silence even if the fade above hasn't finished yet
+  fireworksStageWrap.classList.add('show');
+  var p = fireworksVideo.play();
+  if(p && p.catch) p.catch(function(){});
+}
+
+function goToLaunchStage(){
   forkStageWrap.classList.remove('show');
   setTimeout(function(){
-    fireworksStageWrap.classList.add('show');
-    var p = fireworksVideo.play();
-    if(p && p.catch) p.catch(function(){});
+    launchStageWrap.classList.add('show');
   }, 500);
 }
 
+function goToFireworksStage(){
+  launchStageWrap.classList.remove('show');
+  setTimeout(playFireworksVideoNow, 500);
+}
+
 forkRightBtn.addEventListener('click', function(){
-  fadeOutBgMusic();
-  goToFireworksStage();
+  fadeOutBgMusic(400); // must finish before the launch stage's own sounds start
+  goToLaunchStage();
 });
 
 forkLeftBtn.addEventListener('click', function(){
@@ -1334,91 +1408,90 @@ forkLeftBtn.addEventListener('click', function(){
   showPlaceholder('🎬 هنا سيُشغَّل لاحقاً فيديو الطرد (لم يُرسَل بعد)');
 });
 
-/* ================= STAGE 5: FIREWORKS SPARK TAPS =================
-   Timed to the strongest simultaneous audio-beat + visual-burst moments
-   (measured directly off this video's own waveform + frame brightness).
-   Same mechanic as the candle taps now: the video genuinely pauses at
-   each checkpoint and waits — no timeout, no restart — she is really
-   the one igniting each burst. */
-var sparkCheckpoints = [
-  { time: 2.8,  fx: 0.55, fy: 0.55 },
-  { time: 7.9,  fx: 0.40, fy: 0.53 },
-  { time: 11.5, fx: 0.42, fy: 0.52 },
-  { time: 16.5, fx: 0.45, fy: 0.57 },
-  { time: 19.5, fx: 0.15, fy: 0.38 }
-];
-var finalSparkCheckpoint = { time: 23.1, fx: 0.55, fy: 0.68, tapsNeeded: 3 };
-var sparkIndex = 0;
-var activeSpark = null;       // one of sparkCheckpoints, currently shown
-var finalSparkActive = false;
-var finalSparkTaps = 0;
-var finalSparkTriggered = false;
+/* ================= STAGE 5a: FIREWORK LAUNCH MINI-SCENE =================
+   She drags/slashes her finger across each glowing rocket to launch it —
+   no PNG assets, drawn entirely as SVG/CSS. Once all 5 are gone, the scene
+   hands off straight into the fireworks video (uninterrupted from here on). */
+var launchFireworkEls = Array.prototype.slice.call(document.querySelectorAll('.launch-firework'));
+var launchedCount = 0;
+var launchPointerDown = false;
 
-function positionSparkBtn(cp){
-  var pt = videoPointToScreenFor(fireworksVideo, cp.fx, cp.fy);
-  sparkTapBtn.style.left = pt.x + 'px';
-  sparkTapBtn.style.top = pt.y + 'px';
+function playLaunchWhoosh(){
+  ensureAudioContext();
+  var now = audioCtx.currentTime;
+  var noiseBuffer = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.3, audioCtx.sampleRate);
+  var data = noiseBuffer.getChannelData(0);
+  for(var i = 0; i < data.length; i++){ data[i] = (Math.random() * 2 - 1); }
+  var noise = audioCtx.createBufferSource();
+  noise.buffer = noiseBuffer;
+  var filter = audioCtx.createBiquadFilter();
+  filter.type = 'bandpass';
+  filter.frequency.setValueAtTime(900, now);
+  filter.frequency.exponentialRampToValueAtTime(3200, now + 0.28);
+  var g = audioCtx.createGain();
+  g.gain.setValueAtTime(0.0001, now);
+  g.gain.linearRampToValueAtTime(0.35, now + 0.03);
+  g.gain.exponentialRampToValueAtTime(0.0001, now + 0.32);
+  noise.connect(filter);
+  filter.connect(g);
+  g.connect(audioCtx.destination);
+  noise.start(now);
+  noise.stop(now + 0.33);
 }
 
-function punchFireworksVideo(){
-  fireworksVideo.classList.remove('punch');
-  void fireworksVideo.offsetWidth; // restart the animation even on rapid consecutive taps
-  fireworksVideo.classList.add('punch');
+function spawnSparkBurst(x, y){
+  var n = 10;
+  for(var i = 0; i < n; i++){
+    var el = document.createElement('div');
+    el.className = 'launch-spark-burst';
+    var angle = (Math.PI * 2 * i / n) + (Math.random() * 0.4 - 0.2);
+    var dist = 34 + Math.random() * 26;
+    el.style.left = x + 'px';
+    el.style.top = y + 'px';
+    el.style.setProperty('--dx', (Math.cos(angle) * dist) + 'px');
+    el.style.setProperty('--dy', (Math.sin(angle) * dist) + 'px');
+    launchStageWrap.appendChild(el);
+    (function(node){ setTimeout(function(){ node.remove(); }, 600); })(el);
+  }
 }
 
-function hideSparkBtn(){
-  sparkTapBtn.classList.remove('show');
-  activeSpark = null;
+function launchFirework(el){
+  if(el.dataset.launched === '1') return;
+  el.dataset.launched = '1';
+  launchedCount++;
+  var rect = el.getBoundingClientRect();
+  spawnSparkBurst(rect.left + rect.width/2, rect.top + rect.height/2);
+  playLaunchWhoosh();
+  el.classList.add('launched');
+  if(launchedCount >= launchFireworkEls.length){
+    launchStageWrap.classList.add('all-launched');
+    setTimeout(goToFireworksStage, 750); // let the last one finish its fly-off before handing off
+  }
 }
 
-function resumeFireworksVideo(){
-  var p = fireworksVideo.play();
-  if(p && p.catch) p.catch(function(){});
-}
-
-sparkTapBtn.addEventListener('click', function(){
-  punchFireworksVideo();
-  if(finalSparkActive){
-    finalSparkTaps++;
-    if(finalSparkTaps >= finalSparkCheckpoint.tapsNeeded){
-      hideSparkBtn();
-      finalSparkActive = false;
-      resumeFireworksVideo();
+function tryLaunchAt(clientX, clientY){
+  for(var i = 0; i < launchFireworkEls.length; i++){
+    var el = launchFireworkEls[i];
+    if(el.dataset.launched === '1') continue;
+    var rect = el.getBoundingClientRect();
+    var pad = 14; // a little forgiveness so the swipe doesn't need to be pixel-perfect
+    if(clientX >= rect.left - pad && clientX <= rect.right + pad &&
+       clientY >= rect.top - pad && clientY <= rect.bottom + pad){
+      launchFirework(el);
     }
-    // otherwise: stays visible, paused, at the exact same spot for the next consecutive tap
-    return;
   }
-  if(activeSpark){
-    hideSparkBtn();
-    sparkIndex++; // advance to the next checkpoint now that this one was tapped
-    resumeFireworksVideo();
-  }
+}
+
+launchStageWrap.addEventListener('pointerdown', function(e){
+  launchPointerDown = true;
+  tryLaunchAt(e.clientX, e.clientY);
 });
-
-function fireworksFrameTick(){
-  if(!fireworksVideo.paused && !fireworksVideo.ended){
-    var t = fireworksVideo.currentTime;
-
-    if(!finalSparkTriggered && t >= finalSparkCheckpoint.time){
-      finalSparkTriggered = true;
-      finalSparkActive = true;
-      finalSparkTaps = 0;
-      fireworksVideo.pause();
-      positionSparkBtn(finalSparkCheckpoint);
-      sparkTapBtn.classList.add('show');
-    } else if(!finalSparkActive && sparkIndex < sparkCheckpoints.length){
-      var cp = sparkCheckpoints[sparkIndex];
-      if(t >= cp.time){
-        activeSpark = cp;
-        fireworksVideo.pause();
-        positionSparkBtn(cp);
-        sparkTapBtn.classList.add('show');
-      }
-    }
-  }
-  requestAnimationFrame(fireworksFrameTick);
-}
-requestAnimationFrame(fireworksFrameTick);
+launchStageWrap.addEventListener('pointermove', function(e){
+  if(!launchPointerDown) return;
+  tryLaunchAt(e.clientX, e.clientY);
+});
+window.addEventListener('pointerup', function(){ launchPointerDown = false; });
+window.addEventListener('pointercancel', function(){ launchPointerDown = false; });
 
 /* ================= STAGE 3B: CAKE ================= */
 var micStream = null, micRAF = null, candlesExtinguished = false;
