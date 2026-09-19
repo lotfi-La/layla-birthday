@@ -369,14 +369,25 @@ button{ -webkit-appearance:none; appearance:none; }
   0%, 100%{ filter:drop-shadow(0 0 6px rgba(201,164,92,.75)) drop-shadow(0 0 16px rgba(201,164,92,.4)); }
   50%{ filter:drop-shadow(0 0 10px rgba(236,217,168,.95)) drop-shadow(0 0 26px rgba(201,164,92,.65)); }
 }
-.launch-firework.launched{
-  animation:fireworkLaunch .7s cubic-bezier(.2,.7,.3,1) forwards;
+.launch-firework.flying{
+  animation:none; /* JS now drives position/scale every frame for the wavy flight path */
+  filter:drop-shadow(0 0 16px rgba(255,255,255,.95)) drop-shadow(0 0 36px rgba(201,164,92,.75));
   pointer-events:none;
 }
-@keyframes fireworkLaunch{
-  0%{ transform:translate(-50%,-50%) scale(1); opacity:1; }
-  70%{ opacity:1; }
-  100%{ transform:translate(-50%, calc(-50% - 92vh)) scale(.7); opacity:0; }
+.meteor-trail-dot{
+  position:fixed;
+  z-index:137;
+  width:10px; height:10px;
+  border-radius:50%;
+  background:#fff;
+  box-shadow:0 0 10px 4px rgba(255,255,255,.9), 0 0 22px 10px rgba(255,255,255,.5);
+  transform:translate(-50%,-50%);
+  pointer-events:none;
+  animation:meteorTrailFade .42s ease-out forwards;
+}
+@keyframes meteorTrailFade{
+  0%{ opacity:.9; transform:translate(-50%,-50%) scale(1); }
+  100%{ opacity:0; transform:translate(-50%,-50%) scale(.15); }
 }
 .launch-spark-burst{
   position:absolute;
@@ -640,40 +651,8 @@ canvas#flowerCanvas{ position:absolute; inset:0; width:100%; height:100%; displa
 
 <!-- STAGE 5a: FIREWORK LAUNCH (pre-video mini-scene, right/correct fork path) -->
 <div class="launch-stage-wrap" id="launchStageWrap">
-  <p class="launch-hint">مرّري إصبعك عبر كل شعلة لتشعليها</p>
-  <div class="launch-firework" data-launched="0" style="--lx:14%; --ly:76%;">
-    <svg class="launch-firework-svg" viewBox="0 0 60 100" xmlns="http://www.w3.org/2000/svg">
-      <path d="M30 4 C40 22 45 40 45 58 C45 74 38 84 30 92 C22 84 15 74 15 58 C15 40 20 22 30 4Z" fill="url(#lfGrad)"/>
-      <circle cx="30" cy="42" r="6" fill="var(--bg)" opacity=".35"/>
-      <path d="M15 58 L4 78" stroke="var(--gold)" stroke-width="3" stroke-linecap="round"/>
-      <path d="M45 58 L56 78" stroke="var(--gold)" stroke-width="3" stroke-linecap="round"/>
-    </svg>
-  </div>
-  <div class="launch-firework" data-launched="0" style="--lx:31%; --ly:86%;">
-    <svg class="launch-firework-svg" viewBox="0 0 60 100" xmlns="http://www.w3.org/2000/svg">
-      <path d="M30 4 C40 22 45 40 45 58 C45 74 38 84 30 92 C22 84 15 74 15 58 C15 40 20 22 30 4Z" fill="url(#lfGrad)"/>
-      <circle cx="30" cy="42" r="6" fill="var(--bg)" opacity=".35"/>
-      <path d="M15 58 L4 78" stroke="var(--gold)" stroke-width="3" stroke-linecap="round"/>
-      <path d="M45 58 L56 78" stroke="var(--gold)" stroke-width="3" stroke-linecap="round"/>
-    </svg>
-  </div>
-  <div class="launch-firework" data-launched="0" style="--lx:50%; --ly:80%;">
-    <svg class="launch-firework-svg" viewBox="0 0 60 100" xmlns="http://www.w3.org/2000/svg">
-      <path d="M30 4 C40 22 45 40 45 58 C45 74 38 84 30 92 C22 84 15 74 15 58 C15 40 20 22 30 4Z" fill="url(#lfGrad)"/>
-      <circle cx="30" cy="42" r="6" fill="var(--bg)" opacity=".35"/>
-      <path d="M15 58 L4 78" stroke="var(--gold)" stroke-width="3" stroke-linecap="round"/>
-      <path d="M45 58 L56 78" stroke="var(--gold)" stroke-width="3" stroke-linecap="round"/>
-    </svg>
-  </div>
-  <div class="launch-firework" data-launched="0" style="--lx:69%; --ly:86%;">
-    <svg class="launch-firework-svg" viewBox="0 0 60 100" xmlns="http://www.w3.org/2000/svg">
-      <path d="M30 4 C40 22 45 40 45 58 C45 74 38 84 30 92 C22 84 15 74 15 58 C15 40 20 22 30 4Z" fill="url(#lfGrad)"/>
-      <circle cx="30" cy="42" r="6" fill="var(--bg)" opacity=".35"/>
-      <path d="M15 58 L4 78" stroke="var(--gold)" stroke-width="3" stroke-linecap="round"/>
-      <path d="M45 58 L56 78" stroke="var(--gold)" stroke-width="3" stroke-linecap="round"/>
-    </svg>
-  </div>
-  <div class="launch-firework" data-launched="0" style="--lx:86%; --ly:76%;">
+  <p class="launch-hint">مرّري إصبعك على الشعلة لتشعليها</p>
+  <div class="launch-firework" id="launchFirework" data-launched="0" style="--lx:66%; --ly:86%;">
     <svg class="launch-firework-svg" viewBox="0 0 60 100" xmlns="http://www.w3.org/2000/svg">
       <path d="M30 4 C40 22 45 40 45 58 C45 74 38 84 30 92 C22 84 15 74 15 58 C15 40 20 22 30 4Z" fill="url(#lfGrad)"/>
       <circle cx="30" cy="42" r="6" fill="var(--bg)" opacity=".35"/>
@@ -690,6 +669,7 @@ canvas#flowerCanvas{ position:absolute; inset:0; width:100%; height:100%; displa
     </defs>
   </svg>
 </div>
+
 
 <!-- STAGE 5: FIREWORKS VIDEO (right/correct fork path) -->
 <div class="fireworks-stage-wrap" id="fireworksStageWrap">
@@ -1409,11 +1389,12 @@ forkLeftBtn.addEventListener('click', function(){
 });
 
 /* ================= STAGE 5a: FIREWORK LAUNCH MINI-SCENE =================
-   She drags/slashes her finger across each glowing rocket to launch it —
-   no PNG assets, drawn entirely as SVG/CSS. Once all 5 are gone, the scene
-   hands off straight into the fireworks video (uninterrupted from here on). */
-var launchFireworkEls = Array.prototype.slice.call(document.querySelectorAll('.launch-firework'));
-var launchedCount = 0;
+   She swipes/taps the single glowing rocket to launch it — no PNG assets,
+   drawn entirely as SVG/CSS. It flies up on a sine-wave path (like it's
+   being steered), accelerating and shrinking into the distance, trailing a
+   white meteor streak, and arrives right where the video's own burst opens —
+   so it reads as her having launched it herself. */
+var launchFireworkEl = document.getElementById('launchFirework');
 var launchPointerDown = false;
 
 function playLaunchWhoosh(){
@@ -1426,26 +1407,26 @@ function playLaunchWhoosh(){
   noise.buffer = noiseBuffer;
   var filter = audioCtx.createBiquadFilter();
   filter.type = 'bandpass';
-  filter.frequency.setValueAtTime(900, now);
-  filter.frequency.exponentialRampToValueAtTime(3200, now + 0.28);
+  filter.frequency.setValueAtTime(700, now);
+  filter.frequency.exponentialRampToValueAtTime(4200, now + 0.9);
   var g = audioCtx.createGain();
   g.gain.setValueAtTime(0.0001, now);
-  g.gain.linearRampToValueAtTime(0.35, now + 0.03);
-  g.gain.exponentialRampToValueAtTime(0.0001, now + 0.32);
+  g.gain.linearRampToValueAtTime(0.32, now + 0.05);
+  g.gain.exponentialRampToValueAtTime(0.0001, now + 1.0);
   noise.connect(filter);
   filter.connect(g);
   g.connect(audioCtx.destination);
   noise.start(now);
-  noise.stop(now + 0.33);
+  noise.stop(now + 1.0);
 }
 
 function spawnSparkBurst(x, y){
-  var n = 10;
+  var n = 12;
   for(var i = 0; i < n; i++){
     var el = document.createElement('div');
     el.className = 'launch-spark-burst';
     var angle = (Math.PI * 2 * i / n) + (Math.random() * 0.4 - 0.2);
-    var dist = 34 + Math.random() * 26;
+    var dist = 40 + Math.random() * 32;
     el.style.left = x + 'px';
     el.style.top = y + 'px';
     el.style.setProperty('--dx', (Math.cos(angle) * dist) + 'px');
@@ -1455,30 +1436,77 @@ function spawnSparkBurst(x, y){
   }
 }
 
+function spawnMeteorTrailDot(x, y, scale){
+  var el = document.createElement('div');
+  el.className = 'meteor-trail-dot';
+  el.style.left = x + 'px';
+  el.style.top = y + 'px';
+  el.style.transform = 'translate(-50%,-50%) scale(' + Math.max(scale, 0.25) + ')';
+  launchStageWrap.appendChild(el);
+  setTimeout(function(){ el.remove(); }, 420);
+}
+
+function animateFireworkFlight(el){
+  var startRect = el.getBoundingClientRect();
+  var startX = startRect.left + startRect.width / 2;
+  var startY = startRect.top + startRect.height / 2;
+  // where the video's own first burst opens — she "carries" it there herself
+  var targetX = window.innerWidth * 0.55;
+  var targetY = window.innerHeight * 0.30;
+  var amplitude = window.innerWidth * 0.11;
+  var wiggles = 2.3; // full sine oscillations across the flight
+  var duration = 1300; // ms
+  var startTime = null;
+  var lastTrail = 0;
+
+  el.classList.add('flying');
+  el.style.left = startX + 'px';
+  el.style.top = startY + 'px';
+
+  function frame(ts){
+    if(!startTime) startTime = ts;
+    var elapsed = ts - startTime;
+    var p = Math.min(1, elapsed / duration);
+    var easeP = p * p; // quadratic ease-in = accelerating speed, the "سرعة" effect
+    var x = startX + (targetX - startX) * easeP + Math.sin(easeP * Math.PI * wiggles) * amplitude * (1 - easeP * 0.7);
+    var y = startY + (targetY - startY) * easeP;
+    var scale = Math.max(0.12, 1 - easeP * 0.85); // shrinks as it climbs into the distance
+
+    el.style.left = x + 'px';
+    el.style.top = y + 'px';
+    el.style.transform = 'translate(-50%,-50%) scale(' + scale + ')';
+
+    if(elapsed - lastTrail > 24){
+      lastTrail = elapsed;
+      spawnMeteorTrailDot(x, y, scale);
+    }
+
+    if(p < 1){
+      requestAnimationFrame(frame);
+    }else{
+      spawnSparkBurst(x, y);
+      el.style.opacity = '0';
+      launchStageWrap.classList.add('all-launched');
+      setTimeout(goToFireworksStage, 220);
+    }
+  }
+  requestAnimationFrame(frame);
+}
+
 function launchFirework(el){
   if(el.dataset.launched === '1') return;
   el.dataset.launched = '1';
-  launchedCount++;
-  var rect = el.getBoundingClientRect();
-  spawnSparkBurst(rect.left + rect.width/2, rect.top + rect.height/2);
   playLaunchWhoosh();
-  el.classList.add('launched');
-  if(launchedCount >= launchFireworkEls.length){
-    launchStageWrap.classList.add('all-launched');
-    setTimeout(goToFireworksStage, 750); // let the last one finish its fly-off before handing off
-  }
+  animateFireworkFlight(el);
 }
 
 function tryLaunchAt(clientX, clientY){
-  for(var i = 0; i < launchFireworkEls.length; i++){
-    var el = launchFireworkEls[i];
-    if(el.dataset.launched === '1') continue;
-    var rect = el.getBoundingClientRect();
-    var pad = 14; // a little forgiveness so the swipe doesn't need to be pixel-perfect
-    if(clientX >= rect.left - pad && clientX <= rect.right + pad &&
-       clientY >= rect.top - pad && clientY <= rect.bottom + pad){
-      launchFirework(el);
-    }
+  if(launchFireworkEl.dataset.launched === '1') return;
+  var rect = launchFireworkEl.getBoundingClientRect();
+  var pad = 16; // a little forgiveness so the swipe doesn't need to be pixel-perfect
+  if(clientX >= rect.left - pad && clientX <= rect.right + pad &&
+     clientY >= rect.top - pad && clientY <= rect.bottom + pad){
+    launchFirework(launchFireworkEl);
   }
 }
 
