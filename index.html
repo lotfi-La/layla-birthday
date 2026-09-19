@@ -1405,8 +1405,7 @@ function goToLaunchStage(){
 }
 
 forkRightBtn.addEventListener('click', function(){
-  fadeOutBgMusic(400); // must finish before the launch stage's own sounds start
-  goToLaunchStage();
+  goToLaunchStage(); // loop music now keeps playing through the launch scene — faded out later, right as the video starts
 });
 
 forkLeftBtn.addEventListener('click', function(){
@@ -1495,6 +1494,7 @@ function spawnMeteorTrailDot(x, y, scale){
 }
 
 function fireExplosionFlashAndCut(){
+  fadeOutBgMusic(80); // now fades out right here, timed to finish exactly as the video starts below
   launchFlash.classList.remove('flash-in');
   void launchFlash.offsetWidth; // restart the animation
   launchFlash.classList.add('flash-in');
