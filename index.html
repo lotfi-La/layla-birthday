@@ -998,6 +998,11 @@ function startLoopMusic(){
     loopGainNode = audioCtx.createGain();
     loopGainNode.gain.value = 1;
     loopGainNode.connect(audioCtx.destination);
+  } else {
+    // يعيد رفع مستوى الصوت في حال كان قد خُفِّت سابقًا (fadeOutBgMusic) — وإلا تبقى الموسيقى صامتة عند إعادة التشغيل
+    var restoreNow = audioCtx.currentTime;
+    loopGainNode.gain.cancelScheduledValues(restoreNow);
+    loopGainNode.gain.setValueAtTime(1, restoreNow);
   }
   fetchLoopBuffer().then(function(buf){
     if(loopSource) return; // already started — avoid double-triggering on a race
