@@ -463,6 +463,38 @@ button{ -webkit-appearance:none; appearance:none; }
   display:block;
 }
 
+/* ================= LEFT FORK PATH: 2nd attempt — static meme image instead of a video (lighter) ================= */
+.meme-stage-wrap{
+  position:fixed; inset:0; z-index:135;
+  background:#000;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity 1s ease;
+  overflow:hidden;
+  cursor:pointer;
+}
+.meme-stage-wrap.show{ opacity:1; pointer-events:auto; }
+.meme-stage-wrap img{
+  width:100%; height:100%;
+  object-fit:cover;
+  display:block;
+}
+.meme-tap-hint{
+  position:absolute; bottom:0; left:0; right:0;
+  text-align:center;
+  color:var(--gold-light);
+  font-weight:600;
+  font-size:.95rem;
+  text-shadow:0 2px 14px rgba(0,0,0,.95);
+  padding:0 20px;
+  padding-bottom:max(30px, env(safe-area-inset-bottom));
+  animation:memeHintPulse 1.6s ease-in-out infinite;
+}
+@keyframes memeHintPulse{
+  0%, 100%{ opacity:.65; }
+  50%{ opacity:1; }
+}
+
 /* ================= TEMPORARY placeholder for unfinished fork paths ================= */
 .placeholder-stage-wrap{
   position:fixed; inset:0; z-index:145;
@@ -682,7 +714,7 @@ canvas#flowerCanvas{ position:absolute; inset:0; width:100%; height:100%; displa
 <!-- STAGE 3: CELEBRATION FORK -->
 <div class="fork-stage-wrap" id="forkStageWrap">
   <h2 class="fork-title">يرجى اختيار أحد الخيارين</h2>
-  <div class="fork-option fork-option-left">
+  <div class="fork-option fork-option-left" id="forkOptionLeft">
     <p class="fork-label">الاحتفال وحدك</p>
     <button type="button" class="fork-dot" id="forkLeftBtn" aria-label="الاحتفال وحدك"></button>
   </div>
@@ -731,6 +763,12 @@ canvas#flowerCanvas{ position:absolute; inset:0; width:100%; height:100%; displa
   <video id="aloneVideo1" playsinline preload="none">
     <source src="alone1.mp4" type="video/mp4">
   </video>
+</div>
+
+<!-- LEFT FORK PATH: 2nd (final) attempt — static meme image instead of a video -->
+<div class="meme-stage-wrap" id="memeStageWrap">
+  <img id="memeImage" src="alone2-meme.jpg" alt="">
+  <p class="meme-tap-hint">اضغطي في أي مكان للمتابعة</p>
 </div>
 
 
@@ -851,10 +889,12 @@ var wishSentMsg = document.getElementById('wishSentMsg');
 var forkStageWrap = document.getElementById('forkStageWrap');
 var forkRightBtn = document.getElementById('forkRightBtn');
 var forkLeftBtn = document.getElementById('forkLeftBtn');
+var forkOptionLeft = document.getElementById('forkOptionLeft');
 var fireworksStageWrap = document.getElementById('fireworksStageWrap');
 var fireworksVideo = document.getElementById('fireworksVideo');
 var aloneStageWrap = document.getElementById('aloneStageWrap');
 var aloneVideo1 = document.getElementById('aloneVideo1');
+var memeStageWrap = document.getElementById('memeStageWrap');
 var leftPickCount = 0;
 var launchStageWrap = document.getElementById('launchStageWrap');
 var placeholderStageWrap = document.getElementById('placeholderStageWrap');
@@ -1465,10 +1505,21 @@ forkLeftBtn.addEventListener('click', function(){
     forkStageWrap.classList.remove('show');
     setTimeout(playAloneVideo1, 500);
   } else {
-    // TODO: المحاولة الثانية = فيديو أقسى (لم يُرسَل بعد)، وبعدها إخفاء الزر الأيسر نهائيًا حسب القرار المتخذ
-    showPlaceholder('🎬 المحاولة الثانية: هنا سيُشغَّل الفيديو الأقسى (لم يُرسَل بعد)');
+    forkStageWrap.classList.remove('show');
+    setTimeout(function(){ memeStageWrap.classList.add('show'); }, 500);
   }
 });
+
+/* المحاولة الثانية (النهائية): صورة ميم بدل فيديو — تُلمس في أي مكان للمتابعة،
+   وبعدها يختفي زر "الاحتفال وحدك" نهائيًا فتُجبَر على اختيار اليمين. */
+memeStageWrap.addEventListener('click', function(){
+  memeStageWrap.classList.remove('show');
+  forkOptionLeft.style.display = 'none';
+  setTimeout(function(){
+    forkStageWrap.classList.add('show');
+    startLoopMusic();
+  }, 500);
+}, { once:true });
 
 /* ================= STAGE 5a: FIREWORK LAUNCH MINI-SCENE =================
    She swipes/taps the single glowing rocket to launch it — no PNG assets,
