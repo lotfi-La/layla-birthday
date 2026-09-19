@@ -369,10 +369,37 @@ button{ -webkit-appearance:none; appearance:none; }
   0%, 100%{ filter:drop-shadow(0 0 6px rgba(201,164,92,.75)) drop-shadow(0 0 16px rgba(201,164,92,.4)); }
   50%{ filter:drop-shadow(0 0 10px rgba(236,217,168,.95)) drop-shadow(0 0 26px rgba(201,164,92,.65)); }
 }
+.launch-firework.igniting{
+  animation:launchIgnite .3s ease-in-out;
+  pointer-events:none;
+}
+@keyframes launchIgnite{
+  0%{ transform:translate(-50%,-50%) scale(1) rotate(0deg); }
+  30%{ transform:translate(calc(-50% - 1px), calc(-50% + 1px)) scale(1.05) rotate(-2deg); }
+  60%{ transform:translate(calc(-50% + 1px), calc(-50% - 1px)) scale(1.08) rotate(2deg); }
+  100%{ transform:translate(-50%,-50%) scale(1.03) rotate(0deg); }
+}
+.launch-firework.igniting #lfTip{ animation:lfTipGlow .3s ease-in forwards; }
+@keyframes lfTipGlow{
+  0%{ fill:var(--gold-light); r:3.2px; }
+  100%{ fill:#fff; r:6px; }
+}
 .launch-firework.flying{
   animation:none; /* JS now drives position/scale every frame for the wavy flight path */
   filter:drop-shadow(0 0 16px rgba(255,255,255,.95)) drop-shadow(0 0 36px rgba(201,164,92,.75));
   pointer-events:none;
+}
+.launch-flash{
+  position:fixed; inset:0; z-index:138;
+  background:#fff9ec;
+  opacity:0;
+  pointer-events:none;
+}
+.launch-flash.flash-in{ animation:launchFlash .5s ease-out forwards; }
+@keyframes launchFlash{
+  0%{ opacity:0; }
+  16%{ opacity:1; }
+  100%{ opacity:0; }
 }
 .meteor-trail-dot{
   position:fixed;
@@ -654,10 +681,14 @@ canvas#flowerCanvas{ position:absolute; inset:0; width:100%; height:100%; displa
   <p class="launch-hint">مرّري إصبعك على الشعلة لتشعليها</p>
   <div class="launch-firework" id="launchFirework" data-launched="0" style="--lx:66%; --ly:86%;">
     <svg class="launch-firework-svg" viewBox="0 0 60 100" xmlns="http://www.w3.org/2000/svg">
-      <path d="M30 4 C40 22 45 40 45 58 C45 74 38 84 30 92 C22 84 15 74 15 58 C15 40 20 22 30 4Z" fill="url(#lfGrad)"/>
-      <circle cx="30" cy="42" r="6" fill="var(--bg)" opacity=".35"/>
-      <path d="M15 58 L4 78" stroke="var(--gold)" stroke-width="3" stroke-linecap="round"/>
-      <path d="M45 58 L56 78" stroke="var(--gold)" stroke-width="3" stroke-linecap="round"/>
+      <line x1="30" y1="64" x2="30" y2="98" stroke="var(--gold)" stroke-width="2.5" stroke-linecap="round" opacity=".6"/>
+      <path d="M15 64 L2 88 L15 80 Z" fill="var(--wine-bright)"/>
+      <path d="M45 64 L58 88 L45 80 Z" fill="var(--wine-bright)"/>
+      <rect x="15" y="34" width="30" height="30" rx="5" fill="url(#lfGrad)"/>
+      <rect x="15" y="56" width="30" height="4" fill="var(--wine)"/>
+      <circle cx="30" cy="46" r="5.5" fill="var(--bg)" opacity=".4"/>
+      <path d="M30 2 C40 16 45 26 45 34 L15 34 C15 26 20 16 30 2Z" fill="url(#lfGrad)"/>
+      <circle id="lfTip" cx="30" cy="4" r="3.2" fill="var(--gold-light)"/>
     </svg>
   </div>
   <svg width="0" height="0" style="position:absolute">
@@ -677,6 +708,7 @@ canvas#flowerCanvas{ position:absolute; inset:0; width:100%; height:100%; displa
     <source src="fireworks.mp4" type="video/mp4">
   </video>
 </div>
+<div class="launch-flash" id="launchFlash"></div>
 
 
 <!-- TEMPORARY placeholder screen for whichever fork path is chosen — will be replaced once each stage is actually built -->
@@ -1372,11 +1404,6 @@ function goToLaunchStage(){
   }, 500);
 }
 
-function goToFireworksStage(){
-  launchStageWrap.classList.remove('show');
-  setTimeout(playFireworksVideoNow, 500);
-}
-
 forkRightBtn.addEventListener('click', function(){
   fadeOutBgMusic(400); // must finish before the launch stage's own sounds start
   goToLaunchStage();
@@ -1395,7 +1422,28 @@ forkLeftBtn.addEventListener('click', function(){
    white meteor streak, and arrives right where the video's own burst opens —
    so it reads as her having launched it herself. */
 var launchFireworkEl = document.getElementById('launchFirework');
+var launchFlash = document.getElementById('launchFlash');
 var launchPointerDown = false;
+
+function playIgnitionCrackle(){
+  ensureAudioContext();
+  var now = audioCtx.currentTime;
+  var buf = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.3, audioCtx.sampleRate);
+  var d = buf.getChannelData(0);
+  for(var i = 0; i < d.length; i++){ d[i] = (Math.random() * 2 - 1) * (i / d.length); } // rising hiss
+  var src = audioCtx.createBufferSource();
+  src.buffer = buf;
+  var hp = audioCtx.createBiquadFilter();
+  hp.type = 'highpass';
+  hp.frequency.value = 2500;
+  var g = audioCtx.createGain();
+  g.gain.setValueAtTime(0.0001, now);
+  g.gain.linearRampToValueAtTime(0.2, now + 0.27);
+  g.gain.linearRampToValueAtTime(0.0001, now + 0.3);
+  src.connect(hp); hp.connect(g); g.connect(audioCtx.destination);
+  src.start(now);
+  src.stop(now + 0.3);
+}
 
 function playLaunchWhoosh(){
   ensureAudioContext();
@@ -1408,16 +1456,16 @@ function playLaunchWhoosh(){
   var filter = audioCtx.createBiquadFilter();
   filter.type = 'bandpass';
   filter.frequency.setValueAtTime(700, now);
-  filter.frequency.exponentialRampToValueAtTime(4200, now + 0.9);
+  filter.frequency.exponentialRampToValueAtTime(4200, now + 0.65);
   var g = audioCtx.createGain();
   g.gain.setValueAtTime(0.0001, now);
   g.gain.linearRampToValueAtTime(0.32, now + 0.05);
-  g.gain.exponentialRampToValueAtTime(0.0001, now + 1.0);
+  g.gain.exponentialRampToValueAtTime(0.0001, now + 0.7);
   noise.connect(filter);
   filter.connect(g);
   g.connect(audioCtx.destination);
   noise.start(now);
-  noise.stop(now + 1.0);
+  noise.stop(now + 0.7);
 }
 
 function spawnSparkBurst(x, y){
@@ -1446,16 +1494,28 @@ function spawnMeteorTrailDot(x, y, scale){
   setTimeout(function(){ el.remove(); }, 420);
 }
 
+function fireExplosionFlashAndCut(){
+  launchFlash.classList.remove('flash-in');
+  void launchFlash.offsetWidth; // restart the animation
+  launchFlash.classList.add('flash-in');
+  // swap stages right at the flash's brightest instant — the hard cut hides inside the white flash
+  setTimeout(function(){
+    launchStageWrap.classList.remove('show');
+    playFireworksVideoNow();
+  }, 80);
+}
+
 function animateFireworkFlight(el){
   var startRect = el.getBoundingClientRect();
   var startX = startRect.left + startRect.width / 2;
   var startY = startRect.top + startRect.height / 2;
-  // where the video's own first burst opens — she "carries" it there herself
-  var targetX = window.innerWidth * 0.55;
-  var targetY = window.innerHeight * 0.30;
-  var amplitude = window.innerWidth * 0.11;
-  var wiggles = 2.3; // full sine oscillations across the flight
-  var duration = 1300; // ms
+  // exactly where the video's own first burst opens (measured off the video itself) —
+  // so the rocket visually becomes that explosion, not just a nearby guess
+  var target = videoPointToScreenFor(fireworksVideo, 0.55, 0.55);
+  var targetX = target.x, targetY = target.y;
+  var amplitude = window.innerWidth * 0.1;
+  var wiggles = 2; // full sine oscillations across the flight
+  var duration = 780; // ms — short & punchy, the ignition beat below carries the "slow" half of the rhythm
   var startTime = null;
   var lastTrail = 0;
 
@@ -1467,8 +1527,8 @@ function animateFireworkFlight(el){
     if(!startTime) startTime = ts;
     var elapsed = ts - startTime;
     var p = Math.min(1, elapsed / duration);
-    var easeP = p * p; // quadratic ease-in = accelerating speed, the "سرعة" effect
-    var x = startX + (targetX - startX) * easeP + Math.sin(easeP * Math.PI * wiggles) * amplitude * (1 - easeP * 0.7);
+    var easeP = 1 - Math.pow(1 - p, 2.2); // fast out of the gate, still gathering speed — snappier than before
+    var x = startX + (targetX - startX) * easeP + Math.sin(p * Math.PI * wiggles) * amplitude * (1 - p * 0.7);
     var y = startY + (targetY - startY) * easeP;
     var scale = Math.max(0.12, 1 - easeP * 0.85); // shrinks as it climbs into the distance
 
@@ -1476,7 +1536,7 @@ function animateFireworkFlight(el){
     el.style.top = y + 'px';
     el.style.transform = 'translate(-50%,-50%) scale(' + scale + ')';
 
-    if(elapsed - lastTrail > 24){
+    if(elapsed - lastTrail > 22){
       lastTrail = elapsed;
       spawnMeteorTrailDot(x, y, scale);
     }
@@ -1484,10 +1544,9 @@ function animateFireworkFlight(el){
     if(p < 1){
       requestAnimationFrame(frame);
     }else{
-      spawnSparkBurst(x, y);
+      spawnSparkBurst(targetX, targetY);
       el.style.opacity = '0';
-      launchStageWrap.classList.add('all-launched');
-      setTimeout(goToFireworksStage, 220);
+      fireExplosionFlashAndCut();
     }
   }
   requestAnimationFrame(frame);
@@ -1496,8 +1555,14 @@ function animateFireworkFlight(el){
 function launchFirework(el){
   if(el.dataset.launched === '1') return;
   el.dataset.launched = '1';
-  playLaunchWhoosh();
-  animateFireworkFlight(el);
+  launchStageWrap.classList.add('all-launched'); // hide the hint right away
+  el.classList.add('igniting');
+  playIgnitionCrackle();
+  setTimeout(function(){
+    el.classList.remove('igniting');
+    playLaunchWhoosh();
+    animateFireworkFlight(el);
+  }, 300); // brief "heating up" beat before it actually takes off
 }
 
 function tryLaunchAt(clientX, clientY){
