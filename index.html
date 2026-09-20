@@ -551,9 +551,10 @@ button{ -webkit-appearance:none; appearance:none; }
   animation: roseWordWrite 1.1s cubic-bezier(.22,.9,.28,1) forwards;
 }
 @keyframes roseWordWrite{
-  0%{ clip-path:inset(0 0 0 100%); filter:blur(5px); }
-  55%{ filter:blur(0); }
-  100%{ clip-path:inset(0 0 0 0%); filter:blur(0); }
+  0%{ clip-path:inset(0 0 0 100%); filter:blur(5px) brightness(1); }
+  55%{ filter:blur(0) brightness(1); }
+  72%{ filter:blur(0) brightness(1.9); } /* نبضة توهّج لحظة اكتمال الكتابة */
+  100%{ clip-path:inset(0 0 0 0%); filter:blur(0) brightness(1); }
 }
 
 /* ================= TEMPORARY placeholder for unfinished fork paths ================= */
