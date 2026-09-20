@@ -498,36 +498,16 @@ button{ -webkit-appearance:none; appearance:none; }
 /* ================= STAGE 6: ROSE VIDEO (after fireworks — cinematic lyric overlay) ================= */
 .rose-stage-wrap{
   position:fixed; inset:0; z-index:135;
-  background:
-    radial-gradient(ellipse at 50% 0%, rgba(120,20,30,.35), transparent 60%),
-    radial-gradient(ellipse at 50% 100%, rgba(90,60,10,.3), transparent 60%),
-    #050505;
+  background:#050505;
   opacity:0;
   pointer-events:none;
   transition:opacity 1.2s ease;
   overflow:hidden;
-  display:flex;
-  flex-direction:column;
 }
 .rose-stage-wrap.show{ opacity:1; pointer-events:auto; }
-.rose-bar{
-  flex:1 1 0;
-  min-height:0;
-  position:relative;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  overflow:hidden;
-}
-.rose-frame{
-  position:relative;
-  flex:0 0 auto;
-  width:100%;
-  aspect-ratio:16/9;
-}
-.rose-frame video{
+.rose-stage-wrap video{
   width:100%; height:100%;
-  object-fit:contain;
+  object-fit:cover;
   display:block;
 }
 .rose-word{
@@ -840,24 +820,18 @@ canvas#flowerCanvas{ position:absolute; inset:0; width:100%; height:100%; displa
 
 <!-- STAGE 6: ROSE VIDEO — after fireworks, cinematic lyric overlay -->
 <div class="rose-stage-wrap" id="roseStageWrap">
-  <div class="rose-bar" id="roseBarTop">
-    <span class="rose-word" id="roseWord1">أنتِ</span>
-    <span class="rose-word rose-word-emphasis" id="roseWord2">أعظم</span>
-    <span class="rose-word" id="roseWord3">إنسان</span>
-    <span class="rose-word" id="roseWord4">عرفته</span>
-    <span class="rose-word" id="roseWord5">ومازلت</span>
-  </div>
-  <div class="rose-frame" id="roseFrame">
-    <video id="roseVideo" playsinline preload="none">
-      <source src="4634.mp4" type="video/mp4">
-    </video>
-  </div>
-  <div class="rose-bar" id="roseBarBottom">
-    <span class="rose-word" id="roseWord6">نعرفه</span>
-    <span class="rose-word rose-word-emphasis" id="roseWord7">ونبقى</span>
-    <span class="rose-word" id="roseWord8">نعرفه</span>
-    <span class="rose-word" id="roseWord9">آخر مرحلة</span>
-  </div>
+  <video id="roseVideo" playsinline preload="none">
+    <source src="4634.mp4" type="video/mp4">
+  </video>
+  <span class="rose-word" id="roseWord1">أنتِ</span>
+  <span class="rose-word rose-word-emphasis" id="roseWord2">أعظم</span>
+  <span class="rose-word" id="roseWord3">إنسان</span>
+  <span class="rose-word" id="roseWord4">عرفته</span>
+  <span class="rose-word" id="roseWord5">ومازلت</span>
+  <span class="rose-word" id="roseWord6">نعرفه</span>
+  <span class="rose-word rose-word-emphasis" id="roseWord7">ونبقى</span>
+  <span class="rose-word" id="roseWord8">نعرفه</span>
+  <span class="rose-word" id="roseWord9">آخر مرحلة</span>
 </div>
 
 
