@@ -8,7 +8,7 @@
 <title>Layla's Birthday Edition</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Playfair+Display:ital,wght@1,600;1,800&family=Cairo:wght@400;600;800&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Playfair+Display:ital,wght@1,600;1,800&family=Cairo:wght@400;600;800&family=Amiri:wght@400;700&family=Alex+Brush&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.4/dist/confetti.browser.min.js"></script>
 <style>
 :root{
@@ -679,7 +679,7 @@ canvas#flowerCanvas{ position:absolute; inset:0; width:100%; height:100%; displa
 
 .cake-3d-wrapper{ perspective:1000px; }
 .cake-3d-inner{
-  width:min(66vw, 260px);
+  width:min(72vw, 300px);
   transform-style:preserve-3d;
   transform:rotateY(-70deg) translateZ(-260px) scale(.5);
   opacity:0;
@@ -705,6 +705,11 @@ canvas#flowerCanvas{ position:absolute; inset:0; width:100%; height:100%; displa
   transform:scale(.15,.15) translateY(3px);
   transition:opacity .35s ease, transform .35s ease;
 }
+.cake-glow{ animation:cakeGlowPulse 1.7s ease-in-out infinite; }
+@keyframes cakeGlowPulse{ 0%,100%{ opacity:.55; } 50%{ opacity:.85; } }
+.cake-bounce{ animation:cakeBouncePulse 1.7s ease-in-out infinite; mix-blend-mode:screen; }
+@keyframes cakeBouncePulse{ 0%,100%{ opacity:.35; } 50%{ opacity:.6; } }
+.cake-bounce.out, .cake-glow.out{ opacity:0; transition:opacity .5s ease; animation:none; }
 
 .cake-instruction{
   font-size:1.05rem;
@@ -864,64 +869,231 @@ canvas#flowerCanvas{ position:absolute; inset:0; width:100%; height:100%; displa
     </section>
 
     <section class="stage" id="stage3">
-      <div class="titles-block">
-        <h2 class="title-happy" dir="ltr">HAPPY BIRTHDAY</h2>
-        <h1 class="title-name" dir="ltr">LAYLA</h1>
-      </div>
-
       <div class="substage" id="cakeStage">
         <div class="cake-3d-wrapper">
           <div class="cake-3d-inner" id="cakeInner">
-            <svg class="cake-svg" viewBox="0 0 200 170" role="img" aria-label="Birthday cake">
+            <svg class="cake-svg" viewBox="0 0 220 280" role="img" aria-label="Birthday cake">
               <defs>
-                <linearGradient id="tierBase" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="#7a1420"/>
-                  <stop offset="100%" stop-color="#4a0c14"/>
+                <radialGradient id="ambient" cx="50%" cy="42%" r="80%">
+                  <stop offset="0%" stop-color="#3a1018" stop-opacity=".5"/>
+                  <stop offset="100%" stop-color="#000" stop-opacity="0"/>
+                </radialGradient>
+
+                <linearGradient id="wineWall" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%"  stop-color="#14030a"/>
+                  <stop offset="10%" stop-color="#5c0f1a"/>
+                  <stop offset="40%" stop-color="#a4293e"/>
+                  <stop offset="50%" stop-color="#d97a8f"/>
+                  <stop offset="60%" stop-color="#a4293e"/>
+                  <stop offset="90%" stop-color="#5c0f1a"/>
+                  <stop offset="100%" stop-color="#14030a"/>
                 </linearGradient>
-                <linearGradient id="tierTop" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="#f3ece0"/>
-                  <stop offset="100%" stop-color="#d8cbb0"/>
+                <linearGradient id="creamWall" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%"  stop-color="#7c6640"/>
+                  <stop offset="10%" stop-color="#cbb589"/>
+                  <stop offset="40%" stop-color="#f0e2c4"/>
+                  <stop offset="50%" stop-color="#fffdf6"/>
+                  <stop offset="60%" stop-color="#f0e2c4"/>
+                  <stop offset="90%" stop-color="#cbb589"/>
+                  <stop offset="100%" stop-color="#7c6640"/>
                 </linearGradient>
+
+                <radialGradient id="wineCap" cx="42%" cy="38%" r="75%">
+                  <stop offset="0%" stop-color="#a4293e"/>
+                  <stop offset="55%" stop-color="#7a1524"/>
+                  <stop offset="100%" stop-color="#420a12"/>
+                </radialGradient>
+                <radialGradient id="creamCap" cx="42%" cy="38%" r="75%">
+                  <stop offset="0%" stop-color="#fffdf6"/>
+                  <stop offset="55%" stop-color="#efe0bf"/>
+                  <stop offset="100%" stop-color="#cbb589"/>
+                </radialGradient>
+                <radialGradient id="candleBounce" cx="50%" cy="35%" r="70%">
+                  <stop offset="0%" stop-color="#ffcf6b" stop-opacity=".95"/>
+                  <stop offset="55%" stop-color="#f0902f" stop-opacity=".35"/>
+                  <stop offset="100%" stop-color="#f0902f" stop-opacity="0"/>
+                </radialGradient>
+
+                <linearGradient id="goldTrim" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#5a3f18"/>
+                  <stop offset="16%" stop-color="#c9a45c"/>
+                  <stop offset="32%" stop-color="#fff6df"/>
+                  <stop offset="44%" stop-color="#8c6528"/>
+                  <stop offset="58%" stop-color="#fff6df"/>
+                  <stop offset="76%" stop-color="#c9a45c"/>
+                  <stop offset="100%" stop-color="#5a3f18"/>
+                </linearGradient>
+                <linearGradient id="goldScript" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#8a6b34"/>
+                  <stop offset="30%" stop-color="#fffaf0"/>
+                  <stop offset="50%" stop-color="#eecf8e"/>
+                  <stop offset="70%" stop-color="#fffaf0"/>
+                  <stop offset="100%" stop-color="#8a6b34"/>
+                </linearGradient>
+
+                <linearGradient id="ganache" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#3e1e08"/>
+                  <stop offset="55%" stop-color="#2a1305"/>
+                  <stop offset="100%" stop-color="#1a0c03"/>
+                </linearGradient>
+
                 <radialGradient id="flameGrad" cx="50%" cy="65%" r="70%">
                   <stop offset="0%" stop-color="#fff3b0"/>
                   <stop offset="45%" stop-color="#e8a23a"/>
                   <stop offset="100%" stop-color="#a83a12"/>
                 </radialGradient>
+                <radialGradient id="flameGlow" cx="50%" cy="55%" r="50%">
+                  <stop offset="0%" stop-color="#ffcf6b" stop-opacity=".85"/>
+                  <stop offset="60%" stop-color="#e8a23a" stop-opacity=".22"/>
+                  <stop offset="100%" stop-color="#e8a23a" stop-opacity="0"/>
+                </radialGradient>
+
+                <filter id="softBlur" x="-60%" y="-60%" width="220%" height="220%">
+                  <feGaussianBlur stdDeviation="3.2"/>
+                </filter>
+                <filter id="glowBlur" x="-150%" y="-150%" width="400%" height="400%">
+                  <feGaussianBlur stdDeviation="4.5"/>
+                </filter>
+                <filter id="tierShadow" x="-30%" y="-15%" width="160%" height="150%">
+                  <feDropShadow dx="0" dy="3.2" stdDeviation="2.2" flood-color="#000" flood-opacity="0.5"/>
+                </filter>
+                <filter id="ganacheShadow" x="-40%" y="-20%" width="180%" height="160%">
+                  <feDropShadow dx="0" dy="3" stdDeviation="2.5" flood-color="#000" flood-opacity="0.5"/>
+                </filter>
+                <filter id="smallShadow" x="-80%" y="-80%" width="260%" height="260%">
+                  <feDropShadow dx="0" dy="1.4" stdDeviation="1" flood-color="#000" flood-opacity="0.55"/>
+                </filter>
               </defs>
 
-              <ellipse cx="100" cy="152" rx="82" ry="10" fill="#000" opacity=".4"/>
+              <ellipse cx="110" cy="150" rx="126" ry="128" fill="url(#ambient)"/>
+              <ellipse cx="110" cy="262" rx="96" ry="20" fill="#000" opacity=".5" filter="url(#softBlur)"/>
 
-              <path d="M28 112 Q100 128 172 112 L172 142 Q100 158 28 142 Z" fill="url(#tierBase)"/>
-              <path d="M28 112 Q100 128 172 112" fill="none" stroke="#c9a45c" stroke-width="1.4" opacity=".8"/>
-              <path d="M30 133 Q100 147 170 133" fill="none" stroke="#c9a45c" stroke-width=".8" opacity=".45"/>
+              <!-- base / stand -->
+              <g filter="url(#tierShadow)">
+                <path d="M22 236 L22 250 A88 19.4 0 0 1 198 250 L198 236 Z" fill="url(#goldTrim)"/>
+              </g>
+              <ellipse cx="110" cy="236" rx="88" ry="19.4" fill="url(#goldTrim)"/>
+              <ellipse cx="110" cy="236" rx="88" ry="19.4" fill="none" stroke="#3a2a10" stroke-width="1" opacity=".4"/>
 
-              <path d="M46 78 Q100 92 154 78 L154 112 Q100 128 46 112 Z" fill="url(#tierTop)"/>
-              <path d="M46 78 Q100 92 154 78" fill="none" stroke="#c9a45c" stroke-width="1.4" opacity=".9"/>
+              <!-- tier 1 — wine, nameplate -->
+              <g filter="url(#tierShadow)">
+                <path d="M30 174 L30 236 A80 17.6 0 0 1 190 236 L190 174 Z" fill="url(#wineWall)"/>
+              </g>
+              <ellipse cx="110" cy="174" rx="80" ry="18.6" fill="url(#wineCap)"/>
+              <ellipse cx="110" cy="174" rx="80" ry="17.6" fill="none" stroke="url(#goldTrim)" stroke-width="2.2"/>
 
-              <g fill="#c9a45c" opacity=".85">
-                <circle cx="40" cy="127" r="1.6"/><circle cx="60" cy="134" r="1.6"/><circle cx="80" cy="138" r="1.6"/>
-                <circle cx="100" cy="140" r="1.6"/><circle cx="120" cy="138" r="1.6"/><circle cx="140" cy="134" r="1.6"/><circle cx="160" cy="127" r="1.6"/>
+              <g fill="var(--gold-light)" opacity=".9">
+                <circle cx="42" cy="230" r="2"/><circle cx="61" cy="238.5" r="2"/><circle cx="83" cy="243.5" r="2"/>
+                <circle cx="110" cy="245.2" r="2.1"/>
+                <circle cx="137" cy="243.5" r="2"/><circle cx="159" cy="238.5" r="2"/><circle cx="178" cy="230" r="2"/>
               </g>
 
-              <rect x="58" y="48" width="4.5" height="30" rx="2" fill="#f3ece0"/>
-              <line x1="60.25" y1="48" x2="60.25" y2="43" stroke="#3a2a1a" stroke-width="1.2"/>
-              <path class="flame" style="animation-delay:0s" d="M60.25 30 C55 36 56 44 60.25 44 C64.5 44 65.5 36 60.25 30 Z" fill="url(#flameGrad)"/>
+              <g opacity=".92">
+                <path d="M62 202 Q110 194 158 202" fill="none" stroke="url(#goldTrim)" stroke-width="1.4"/>
+                <path d="M62 221 Q110 229 158 221" fill="none" stroke="url(#goldTrim)" stroke-width="1.4"/>
+                <path d="M62 202 Q57 211.5 62 221" fill="none" stroke="url(#goldTrim)" stroke-width="1.1"/>
+                <path d="M158 202 Q163 211.5 158 221" fill="none" stroke="url(#goldTrim)" stroke-width="1.1"/>
+                <circle cx="62" cy="202" r="1.6" fill="var(--gold-light)"/>
+                <circle cx="158" cy="202" r="1.6" fill="var(--gold-light)"/>
+                <circle cx="62" cy="221" r="1.6" fill="var(--gold-light)"/>
+                <circle cx="158" cy="221" r="1.6" fill="var(--gold-light)"/>
+              </g>
+              <text x="110" y="218" text-anchor="middle" font-family="'Alex Brush', cursive" font-size="34" fill="url(#goldScript)" style="paint-order:stroke; stroke:#3a220a; stroke-width:.6; stroke-opacity:.35;">Layla</text>
 
-              <rect x="79" y="42" width="4.5" height="36" rx="2" fill="#c9a45c"/>
-              <line x1="81.25" y1="42" x2="81.25" y2="37" stroke="#3a2a1a" stroke-width="1.2"/>
-              <path class="flame" style="animation-delay:.25s" d="M81.25 24 C76 30 77 38 81.25 38 C85.5 38 86.5 30 81.25 24 Z" fill="url(#flameGrad)"/>
+              <!-- piped chocolate flourishes flanking the nameplate -->
+              <g filter="url(#ganacheShadow)">
+                <g transform="translate(50,213)" fill="none" stroke="url(#ganache)" stroke-width="2.1" stroke-linecap="round">
+                  <path d="M0 0 C6 -3 10 -9 7 -15 C4 -20 -3 -19 -3 -13 C-3 -9 1 -6 5 -7"/>
+                  <path d="M5 -7 C7 -7.5 8 -5 6 -3"/>
+                </g>
+                <g transform="translate(50,213)" fill="none" stroke="rgba(255,255,255,.4)" stroke-width=".8" stroke-linecap="round">
+                  <path d="M-1 -2 C2 -6 4 -11 2.5 -14.5"/>
+                </g>
+                <g transform="translate(170,213) scale(-1,1)" fill="none" stroke="url(#ganache)" stroke-width="2.1" stroke-linecap="round">
+                  <path d="M0 0 C6 -3 10 -9 7 -15 C4 -20 -3 -19 -3 -13 C-3 -9 1 -6 5 -7"/>
+                  <path d="M5 -7 C7 -7.5 8 -5 6 -3"/>
+                </g>
+                <g transform="translate(170,213) scale(-1,1)" fill="none" stroke="rgba(255,255,255,.4)" stroke-width=".8" stroke-linecap="round">
+                  <path d="M-1 -2 C2 -6 4 -11 2.5 -14.5"/>
+                </g>
+                <circle cx="46.5" cy="197" r="1.4" fill="url(#ganache)"/>
+                <circle cx="173.5" cy="197" r="1.4" fill="url(#ganache)"/>
+              </g>
 
-              <rect x="98" y="37" width="4.5" height="41" rx="2" fill="#f3ece0"/>
-              <line x1="100.25" y1="37" x2="100.25" y2="32" stroke="#3a2a1a" stroke-width="1.2"/>
-              <path class="flame" style="animation-delay:.5s" d="M100.25 18 C94.5 25 95.5 34 100.25 34 C105 34 106 25 100.25 18 Z" fill="url(#flameGrad)"/>
+              <!-- tier 2 — cream -->
+              <g filter="url(#tierShadow)">
+                <path d="M46 110 L46 174 A64 14.1 0 0 1 174 174 L174 110 Z" fill="url(#creamWall)"/>
+              </g>
+              <ellipse cx="110" cy="110" rx="64" ry="15.1" fill="url(#creamCap)"/>
+              <ellipse cx="110" cy="110" rx="64" ry="14.1" fill="none" stroke="url(#goldTrim)" stroke-width="2"/>
 
-              <rect x="117" y="42" width="4.5" height="36" rx="2" fill="#c9a45c"/>
-              <line x1="119.25" y1="42" x2="119.25" y2="37" stroke="#3a2a1a" stroke-width="1.2"/>
-              <path class="flame" style="animation-delay:.75s" d="M119.25 24 C114 30 115 38 119.25 38 C123.5 38 124.5 30 119.25 24 Z" fill="url(#flameGrad)"/>
+              <g fill="var(--gold-light)" opacity=".9">
+                <circle cx="52" cy="155" r="1.8"/><circle cx="84" cy="155" r="1.8"/>
+                <circle cx="116" cy="155" r="1.9"/>
+                <circle cx="148" cy="155" r="1.8"/><circle cx="168" cy="155" r="1.8"/>
+              </g>
+              <g fill="none" stroke="url(#goldTrim)" stroke-width="1" opacity=".75">
+                <path d="M52 155 Q68 166 84 155"/>
+                <path d="M84 155 Q100 166 116 155"/>
+                <path d="M116 155 Q132 166 148 155"/>
+                <path d="M148 155 Q164 166 168 155"/>
+              </g>
+              <g fill="var(--gold-light)">
+                <circle cx="52" cy="155" r="1.6"/><circle cx="84" cy="155" r="1.6"/>
+                <circle cx="116" cy="155" r="1.6"/><circle cx="148" cy="155" r="1.6"/><circle cx="168" cy="155" r="1.6"/>
+              </g>
 
-              <rect x="138" y="48" width="4.5" height="30" rx="2" fill="#f3ece0"/>
-              <line x1="140.25" y1="48" x2="140.25" y2="43" stroke="#3a2a1a" stroke-width="1.2"/>
-              <path class="flame" style="animation-delay:1s" d="M140.25 30 C135 36 136 44 140.25 44 C144.5 44 145.5 36 140.25 30 Z" fill="url(#flameGrad)"/>
+              <!-- piped chocolate garland -->
+              <g filter="url(#ganacheShadow)">
+                <path d="M62 128 C70 116 78 140 86 128 C94 116 102 140 110 128 C118 116 126 140 134 128 C142 116 150 140 158 128"
+                      fill="none" stroke="url(#ganache)" stroke-width="2.3" stroke-linecap="round"/>
+                <path d="M62 126.5 C70 115 78 138 86 126.5 C94 115 102 138 110 126.5 C118 115 126 138 134 126.5 C142 115 150 138 158 126.5"
+                      fill="none" stroke="rgba(255,255,255,.35)" stroke-width=".9" stroke-linecap="round"/>
+                <g fill="url(#ganache)">
+                  <circle cx="62" cy="128" r="1.6"/><circle cx="86" cy="128" r="1.6"/><circle cx="110" cy="128" r="1.7"/>
+                  <circle cx="134" cy="128" r="1.6"/><circle cx="158" cy="128" r="1.6"/>
+                </g>
+              </g>
+
+              <!-- tier 3 — wine, candle platform below -->
+              <g filter="url(#tierShadow)">
+                <path d="M70 76 L70 110 A40 8.8 0 0 1 150 110 L150 76 Z" fill="url(#wineWall)"/>
+              </g>
+              <g fill="var(--gold-light)" opacity=".9">
+                <circle cx="80" cy="113" r="1.5"/><circle cx="95" cy="118.5" r="1.5"/>
+                <circle cx="110" cy="120" r="1.6"/>
+                <circle cx="125" cy="118.5" r="1.5"/><circle cx="140" cy="113" r="1.5"/>
+              </g>
+
+              <ellipse cx="110" cy="76" rx="40" ry="9.8" fill="url(#creamCap)"/>
+              <ellipse class="cake-bounce" cx="110" cy="72" rx="34" ry="8" fill="url(#candleBounce)"/>
+              <ellipse cx="110" cy="76" rx="40" ry="8.8" fill="none" stroke="url(#goldTrim)" stroke-width="1.5"/>
+
+              <!-- candles -->
+              <g>
+                <ellipse cx="89.8" cy="47.5" rx="4.5" ry="1.5" fill="#000" opacity=".4" filter="url(#smallShadow)"/>
+                <circle class="cake-glow" cx="89.8" cy="30" r="9" fill="url(#flameGlow)" filter="url(#glowBlur)"/>
+                <rect x="88" y="46" width="3.6" height="26" rx="1.6" fill="var(--gold-light)"/>
+                <rect x="88" y="46" width="1.3" height="26" rx=".6" fill="#fff" opacity=".45"/>
+                <line x1="89.8" y1="46" x2="89.8" y2="41.5" stroke="#3a2a1a" stroke-width="1"/>
+                <path class="flame" style="animation-delay:0s" d="M89.8 30 C85.4 35 86.3 42 89.8 42 C93.3 42 94.2 35 89.8 30 Z" fill="url(#flameGrad)"/>
+              </g>
+              <g>
+                <ellipse cx="108" cy="41.5" rx="4.8" ry="1.6" fill="#000" opacity=".42" filter="url(#smallShadow)"/>
+                <circle class="cake-glow" cx="108" cy="22" r="10" fill="url(#flameGlow)" filter="url(#glowBlur)"/>
+                <rect x="106.2" y="40" width="3.6" height="32" rx="1.6" fill="var(--gold)"/>
+                <rect x="106.2" y="40" width="1.3" height="32" rx=".6" fill="#fff" opacity=".4"/>
+                <line x1="108" y1="40" x2="108" y2="35" stroke="#3a2a1a" stroke-width="1"/>
+                <path class="flame" style="animation-delay:.3s" d="M108 22 C103.6 27.5 104.5 35 108 35 C111.5 35 112.4 27.5 108 22 Z" fill="url(#flameGrad)"/>
+              </g>
+              <g>
+                <ellipse cx="128.4" cy="47.5" rx="4.5" ry="1.5" fill="#000" opacity=".4" filter="url(#smallShadow)"/>
+                <circle class="cake-glow" cx="128.4" cy="30" r="9" fill="url(#flameGlow)" filter="url(#glowBlur)"/>
+                <rect x="126.6" y="46" width="3.6" height="26" rx="1.6" fill="var(--gold-light)"/>
+                <rect x="126.6" y="46" width="1.3" height="26" rx=".6" fill="#fff" opacity=".45"/>
+                <line x1="128.4" y1="46" x2="128.4" y2="41.5" stroke="#3a2a1a" stroke-width="1"/>
+                <path class="flame" style="animation-delay:.6s" d="M128.4 30 C124 35 124.9 42 128.4 42 C131.9 42 132.8 35 128.4 30 Z" fill="url(#flameGrad)"/>
+              </g>
             </svg>
           </div>
         </div>
@@ -1594,11 +1766,14 @@ fireworksVideo.addEventListener('ended', function(){
 });
 
 roseVideo.addEventListener('ended', function(){
-  // TODO: مرحلة الكيكة لم تُبنَ بعد — مؤقتًا نعرض شاشة نائبة
   roseStageWrap.classList.remove('show');
-  placeholderText.textContent = '🎂 هنا ستأتي مرحلة الكيكة (لم تُبنَ بعد)';
   setTimeout(function(){
-    placeholderStageWrap.classList.add('show');
+    goToStage3();
+    setTimeout(function(){
+      cakeStage.classList.add('substage-show');
+      cakeInner.classList.add('cake-in');
+      setupMicBlowDetection();
+    }, 500);
   }, 500);
 });
 
@@ -1885,6 +2060,8 @@ function extinguishCandles(){
       spawnSmoke(flame);
     }, i * 90);
   });
+  document.querySelectorAll('.cake-glow').forEach(function(el){ el.classList.add('out'); });
+  document.querySelectorAll('.cake-bounce').forEach(function(el){ el.classList.add('out'); });
 
   setTimeout(function(){
     cakeInstruction.style.opacity = '0';
