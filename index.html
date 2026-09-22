@@ -723,6 +723,37 @@ canvas#flowerCanvas{ position:absolute; inset:0; width:100%; height:100%; displa
 }
 .cake-instruction.lit{ color:var(--gold-light); }
 
+.envelope-btn{
+  margin-top:28px;
+  width:58px; height:58px;
+  border-radius:50%;
+  border:none;
+  background:radial-gradient(circle at 35% 30%, #3d1e08, #1a0c03);
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.6rem;
+  cursor:pointer;
+  touch-action:manipulation;
+  opacity:0;
+  transform:scale(.6);
+  pointer-events:none;
+  transition:opacity .6s ease, transform .6s cubic-bezier(.34,1.56,.64,1);
+}
+.envelope-btn.show{
+  opacity:1;
+  transform:scale(1);
+  pointer-events:auto;
+  animation:envelopeShake 2.6s ease-in-out infinite, forkDotPulse 1.4s ease-in-out infinite;
+}
+.envelope-btn.out{ opacity:0; transform:scale(.6); pointer-events:none; animation:none; }
+@keyframes envelopeShake{
+  0%, 82%, 100%{ transform:rotate(0deg); }
+  85%{ transform:rotate(-9deg); }
+  88%{ transform:rotate(8deg); }
+  91%{ transform:rotate(-6deg); }
+  94%{ transform:rotate(4deg); }
+  97%{ transform:rotate(0deg); }
+}
+
 .smoke-particle{
   position:fixed;
   width:9px; height:9px;
@@ -851,7 +882,6 @@ canvas#flowerCanvas{ position:absolute; inset:0; width:100%; height:100%; displa
   <span class="rose-word" id="roseWord6">نعرفه</span>
   <span class="rose-word rose-word-emphasis" id="roseWord7">ونبقى</span>
   <span class="rose-word" id="roseWord8">نعرفه</span>
-  <span class="rose-word" id="roseWord9">آخر مرحلة</span>
 </div>
 
 
@@ -1097,7 +1127,8 @@ canvas#flowerCanvas{ position:absolute; inset:0; width:100%; height:100%; displa
             </svg>
           </div>
         </div>
-        <p class="cake-instruction" id="cakeInstruction">انفخي لتنطفأ الشموع 🎙️✨</p>
+        <p class="cake-instruction" id="cakeInstruction">انفخي بالمايك فعلاً لتنطفئ الشموع 🎙️✨</p>
+        <button type="button" class="envelope-btn" id="envelopeBtn" aria-label="رسالة">📧</button>
       </div>
     </section>
 
@@ -1153,6 +1184,7 @@ var placeholderText = document.getElementById('placeholderText');
 var cakeStage = document.getElementById('cakeStage');
 var cakeInner = document.getElementById('cakeInner');
 var cakeInstruction = document.getElementById('cakeInstruction');
+var envelopeBtn = document.getElementById('envelopeBtn');
 
 /* ================= AUDIO ================= */
 var audioCtx = null, masterGain = null, ambientStarted = false, chordStep = 0;
@@ -1736,8 +1768,7 @@ var roseWords = [
   { el: null, time: 20.5, showUntil: 23.0 },  // ومازلت
   { el: null, time: 32.5, showUntil: 34.0 },  // نعرفه (الأولى) — أُخّرت لتظهر بعد اكتمال المسار الأزرق كما طلبت
   { el: null, time: 37.5, showUntil: 39.0 },  // ونبقى — الهدوء المؤقت أثناء المسار الأزرق (00:37.0–00:39.0)
-  { el: null, time: 46.5, showUntil: 50.5 },  // نعرفه (الثانية) — أُخّرت حتى تكتمل الزخرفة الدائرية بصريًا وتفتح بالكامل
-  { el: null, time: 52.0, showUntil: 57.0 }   // آخر مرحلة — استقرار الماندالا النهائية (00:48.0–01:04.9)
+  { el: null, time: 48.0, showUntil: 52.0 }   // نعرفه (الثانية) — أُخّرت قليلاً أكثر بطلب لطفي
 ];
 for(var rw = 0; rw < roseWords.length; rw++){
   roseWords[rw].el = document.getElementById('roseWord' + (rw + 1));
@@ -1766,13 +1797,13 @@ fireworksVideo.addEventListener('ended', function(){
 });
 
 roseVideo.addEventListener('ended', function(){
-  roseStageWrap.classList.remove('show');
-  goToStage3();
+  goToStage3(); // slide happens now, while roseStageWrap is still fully opaque — invisible
   setTimeout(function(){
-    cakeStage.classList.add('substage-show');
+    roseStageWrap.classList.remove('show');  // 1.2s fade out
+    cakeStage.classList.add('substage-show'); // fades in alongside it
     cakeInner.classList.add('cake-in');
     setupMicBlowDetection();
-  }, 650);
+  }, 1200);
 });
 
 function goToLaunchStage(){
@@ -2069,8 +2100,20 @@ function extinguishCandles(){
       cakeInstruction.style.opacity = '1';
     }, 350);
     fireConfetti();
+    setTimeout(function(){ envelopeBtn.classList.add('show'); }, 2200);
   }, 650);
 }
+
+envelopeBtn.addEventListener('click', function(){
+  // STUB: هذا فتح مبدئي بسيط فقط — أنيميشن فتح الظرف الكامل ونص الرسالة
+  // النهائي هما المهمة القادمة المخصّصة (الأصعب في المشروع حسب لطفي).
+  envelopeBtn.classList.add('out');
+  cakeInstruction.style.opacity = '0';
+  setTimeout(function(){
+    cakeInstruction.textContent = '💌 (الرسالة الكاملة قادمة قريبًا...)';
+    cakeInstruction.style.opacity = '1';
+  }, 400);
+});
 
 function fireConfetti(){
   if(typeof confetti !== 'function') return;
