@@ -736,7 +736,7 @@ canvas#flowerCanvas{ position:absolute; inset:0; width:100%; height:100%; displa
   border:1px solid rgba(201,164,92,.4);
   background:linear-gradient(165deg, rgba(30,10,12,.6), rgba(5,5,5,.92));
   box-shadow:0 0 50px rgba(201,164,92,.08), inset 0 0 30px rgba(92,15,26,.18);
-  padding:16px 22px;
+  padding:8px 12px;
   display:flex; align-items:center; justify-content:center;
   cursor:pointer;
   touch-action:manipulation;
@@ -751,7 +751,7 @@ canvas#flowerCanvas{ position:absolute; inset:0; width:100%; height:100%; displa
 }
 .envelope-btn::before{ top:-1px; left:-1px; border-right:none; border-bottom:none; }
 .envelope-btn::after{ bottom:-1px; right:-1px; border-left:none; border-top:none; }
-.envelope-btn svg{ width:46px; height:auto; display:block; }
+.envelope-btn svg{ width:84px; height:auto; display:block; }
 .envelope-btn.show{
   opacity:1;
   transform:scale(1);
@@ -768,8 +768,8 @@ canvas#flowerCanvas{ position:absolute; inset:0; width:100%; height:100%; displa
   97%{ transform:rotate(0deg); }
 }
 @keyframes envelopeGlow{
-  0%, 100%{ box-shadow:0 0 18px 4px rgba(255,196,110,.5), 0 0 44px 14px rgba(255,150,60,.3), inset 0 0 30px rgba(92,15,26,.18); }
-  50%{ box-shadow:0 0 26px 8px rgba(255,214,145,.7), 0 0 60px 20px rgba(255,164,75,.4), inset 0 0 30px rgba(92,15,26,.18); }
+  0%, 100%{ box-shadow:0 0 22px 6px rgba(255,196,110,.55), 0 0 50px 16px rgba(255,150,60,.32), 0 0 90px 30px rgba(201,164,92,.14), inset 0 0 30px rgba(92,15,26,.18); }
+  50%{ box-shadow:0 0 32px 10px rgba(255,214,145,.8), 0 0 70px 24px rgba(255,164,75,.45), 0 0 120px 40px rgba(201,164,92,.22), inset 0 0 30px rgba(92,15,26,.18); }
 }
 
 .smoke-particle{
@@ -1002,12 +1002,6 @@ canvas#flowerCanvas{ position:absolute; inset:0; width:100%; height:100%; displa
                 <filter id="glowBlur" x="-150%" y="-150%" width="400%" height="400%">
                   <feGaussianBlur stdDeviation="4.5"/>
                 </filter>
-                <filter id="tierShadow" x="-30%" y="-15%" width="160%" height="150%">
-                  <feDropShadow dx="0" dy="3.2" stdDeviation="2.2" flood-color="#000" flood-opacity="0.5"/>
-                </filter>
-                <filter id="ganacheShadow" x="-40%" y="-20%" width="180%" height="160%">
-                  <feDropShadow dx="0" dy="3" stdDeviation="2.5" flood-color="#000" flood-opacity="0.5"/>
-                </filter>
                 <filter id="smallShadow" x="-80%" y="-80%" width="260%" height="260%">
                   <feDropShadow dx="0" dy="1.4" stdDeviation="1" flood-color="#000" flood-opacity="0.55"/>
                 </filter>
@@ -1017,16 +1011,14 @@ canvas#flowerCanvas{ position:absolute; inset:0; width:100%; height:100%; displa
               <ellipse cx="110" cy="262" rx="96" ry="20" fill="#000" opacity=".5" filter="url(#softBlur)"/>
 
               <!-- base / stand -->
-              <g filter="url(#tierShadow)">
-                <path d="M22 236 L22 250 A88 19.4 0 0 1 198 250 L198 236 Z" fill="url(#goldTrim)"/>
-              </g>
+              <path d="M24 239 L24 253 A88 19.4 0 0 1 200 253 L200 239 Z" fill="#000" opacity=".18"/>
+              <path d="M22 236 L22 250 A88 19.4 0 0 1 198 250 L198 236 Z" fill="url(#goldTrim)"/>
               <ellipse cx="110" cy="236" rx="88" ry="19.4" fill="url(#goldTrim)"/>
               <ellipse cx="110" cy="236" rx="88" ry="19.4" fill="none" stroke="#3a2a10" stroke-width="1" opacity=".4"/>
 
               <!-- tier 1 — wine, nameplate -->
-              <g filter="url(#tierShadow)">
-                <path d="M30 174 L30 236 A80 17.6 0 0 1 190 236 L190 174 Z" fill="url(#wineWall)"/>
-              </g>
+              <path d="M32 177 L32 239 A80 17.6 0 0 1 192 239 L192 177 Z" fill="#000" opacity=".18"/>
+              <path d="M30 174 L30 236 A80 17.6 0 0 1 190 236 L190 174 Z" fill="url(#wineWall)"/>
               <ellipse cx="110" cy="174" rx="80" ry="18.6" fill="url(#wineCap)"/>
               <ellipse cx="110" cy="174" rx="80" ry="17.6" fill="none" stroke="url(#goldTrim)" stroke-width="2.2"/>
 
@@ -1049,7 +1041,7 @@ canvas#flowerCanvas{ position:absolute; inset:0; width:100%; height:100%; displa
               <text x="110" y="218" text-anchor="middle" font-family="'Alex Brush', cursive" font-size="34" fill="url(#goldScript)" style="paint-order:stroke; stroke:#3a220a; stroke-width:.6; stroke-opacity:.35;">Layla</text>
 
               <!-- piped chocolate flourishes flanking the nameplate -->
-              <g filter="url(#ganacheShadow)">
+              <g>
                 <g transform="translate(50,213)" fill="none" stroke="url(#ganache)" stroke-width="2.1" stroke-linecap="round">
                   <path d="M0 0 C6 -3 10 -9 7 -15 C4 -20 -3 -19 -3 -13 C-3 -9 1 -6 5 -7"/>
                   <path d="M5 -7 C7 -7.5 8 -5 6 -3"/>
@@ -1069,9 +1061,8 @@ canvas#flowerCanvas{ position:absolute; inset:0; width:100%; height:100%; displa
               </g>
 
               <!-- tier 2 — cream -->
-              <g filter="url(#tierShadow)">
-                <path d="M46 110 L46 174 A64 14.1 0 0 1 174 174 L174 110 Z" fill="url(#creamWall)"/>
-              </g>
+              <path d="M48 113 L48 177 A64 14.1 0 0 1 176 177 L176 113 Z" fill="#000" opacity=".16"/>
+              <path d="M46 110 L46 174 A64 14.1 0 0 1 174 174 L174 110 Z" fill="url(#creamWall)"/>
               <ellipse cx="110" cy="110" rx="64" ry="15.1" fill="url(#creamCap)"/>
               <ellipse cx="110" cy="110" rx="64" ry="14.1" fill="none" stroke="url(#goldTrim)" stroke-width="2"/>
 
@@ -1092,7 +1083,7 @@ canvas#flowerCanvas{ position:absolute; inset:0; width:100%; height:100%; displa
               </g>
 
               <!-- piped chocolate garland -->
-              <g filter="url(#ganacheShadow)">
+              <g>
                 <path d="M62 128 C70 116 78 140 86 128 C94 116 102 140 110 128 C118 116 126 140 134 128 C142 116 150 140 158 128"
                       fill="none" stroke="url(#ganache)" stroke-width="2.3" stroke-linecap="round"/>
                 <path d="M62 126.5 C70 115 78 138 86 126.5 C94 115 102 138 110 126.5 C118 115 126 138 134 126.5 C142 115 150 138 158 126.5"
@@ -1104,9 +1095,8 @@ canvas#flowerCanvas{ position:absolute; inset:0; width:100%; height:100%; displa
               </g>
 
               <!-- tier 3 — wine, candle platform below -->
-              <g filter="url(#tierShadow)">
-                <path d="M70 76 L70 110 A40 8.8 0 0 1 150 110 L150 76 Z" fill="url(#wineWall)"/>
-              </g>
+              <path d="M72 79 L72 113 A40 8.8 0 0 1 152 113 L152 79 Z" fill="#000" opacity=".18"/>
+              <path d="M70 76 L70 110 A40 8.8 0 0 1 150 110 L150 76 Z" fill="url(#wineWall)"/>
               <g fill="var(--gold-light)" opacity=".9">
                 <circle cx="80" cy="113" r="1.5"/><circle cx="95" cy="118.5" r="1.5"/>
                 <circle cx="110" cy="120" r="1.6"/>
@@ -1832,18 +1822,27 @@ fireworksVideo.addEventListener('ended', function(){
   }, 1200); // fade transition only, as agreed — no interaction in between
 });
 
-roseVideo.addEventListener('ended', function(){
+var roseTransitionStarted = false;
+function beginCakeTransition(){
+  if(roseTransitionStarted) return;
+  roseTransitionStarted = true;
   goToStage3(); // slide happens now, while roseStageWrap is still fully opaque — invisible
   setTimeout(function(){
     roseStageWrap.classList.remove('show');   // 1.2s pure opacity fade out
     cakeStage.classList.add('substage-show'); // fades in alongside it
-    cakeInner.classList.add('cake-in');       // lighter 3D flip-in (see will-change + reduced distance above)
+    cakeInner.classList.add('cake-in');       // lighter 3D flip-in
     setupMicBlowDetection();
     setTimeout(function(){
       cakeInner.classList.add('cake-sway'); // gentle continuous sway once the entrance settles
     }, 1300);
   }, 1200);
+}
+roseVideo.addEventListener('timeupdate', function(){
+  if(roseVideo.duration && (roseVideo.duration - roseVideo.currentTime) <= 1.2){
+    beginCakeTransition(); // starts while the video still has its last moment playing — a real cross-dissolve, not a hard cut
+  }
 });
+roseVideo.addEventListener('ended', beginCakeTransition); // fallback, in case timeupdate ever misses the window
 
 function goToLaunchStage(){
   forkStageWrap.classList.remove('show');
