@@ -678,7 +678,7 @@ canvas#flowerCanvas{ position:absolute; inset:0; width:100%; height:100%; displa
 #cakeStage{ display:none; opacity:0; transition:opacity .5s ease; touch-action:manipulation; }
 #cakeStage.substage-show{ display:flex; opacity:1; }
 
-.cake-3d-wrapper{ perspective:1000px; }
+.cake-3d-wrapper{ perspective:1000px; position:relative; }
 .cake-3d-inner{
   width:min(72vw, 300px);
   transform-style:preserve-3d;
@@ -731,27 +731,21 @@ canvas#flowerCanvas{ position:absolute; inset:0; width:100%; height:100%; displa
 .cake-instruction.lit{ color:var(--gold-light); }
 
 .envelope-btn{
-  margin-top:28px;
-  position:relative;
-  border:1px solid rgba(201,164,92,.4);
-  background:linear-gradient(165deg, rgba(30,10,12,.6), rgba(5,5,5,.92));
-  box-shadow:0 0 50px rgba(201,164,92,.08), inset 0 0 30px rgba(92,15,26,.18);
-  padding:8px 12px;
-  display:flex; align-items:center; justify-content:center;
+  position:absolute;
+  top:2%;
+  right:2%;
+  border:none;
+  background:transparent;
+  padding:0;
   cursor:pointer;
   touch-action:manipulation;
   opacity:0;
   transform:scale(.6);
   pointer-events:none;
   transition:opacity .6s ease, transform .6s cubic-bezier(.34,1.56,.64,1);
+  z-index:3;
 }
-.envelope-btn::before,.envelope-btn::after{
-  content:''; position:absolute; width:14px; height:14px;
-  border:1px solid var(--gold); opacity:.6;
-}
-.envelope-btn::before{ top:-1px; left:-1px; border-right:none; border-bottom:none; }
-.envelope-btn::after{ bottom:-1px; right:-1px; border-left:none; border-top:none; }
-.envelope-btn svg{ width:84px; height:auto; display:block; }
+.envelope-btn svg{ width:64px; height:auto; display:block; }
 .envelope-btn.show{
   opacity:1;
   transform:scale(1);
@@ -768,8 +762,8 @@ canvas#flowerCanvas{ position:absolute; inset:0; width:100%; height:100%; displa
   97%{ transform:rotate(0deg); }
 }
 @keyframes envelopeGlow{
-  0%, 100%{ box-shadow:0 0 22px 6px rgba(255,196,110,.55), 0 0 50px 16px rgba(255,150,60,.32), 0 0 90px 30px rgba(201,164,92,.14), inset 0 0 30px rgba(92,15,26,.18); }
-  50%{ box-shadow:0 0 32px 10px rgba(255,214,145,.8), 0 0 70px 24px rgba(255,164,75,.45), 0 0 120px 40px rgba(201,164,92,.22), inset 0 0 30px rgba(92,15,26,.18); }
+  0%, 100%{ filter:drop-shadow(0 0 8px rgba(255,196,110,.65)) drop-shadow(0 0 18px rgba(255,150,60,.4)); }
+  50%{ filter:drop-shadow(0 0 14px rgba(255,214,145,.9)) drop-shadow(0 0 28px rgba(255,164,75,.55)); }
 }
 
 .smoke-particle{
@@ -1134,9 +1128,7 @@ canvas#flowerCanvas{ position:absolute; inset:0; width:100%; height:100%; displa
               </g>
             </svg>
           </div>
-        </div>
-        <p class="cake-instruction" id="cakeInstruction">انفخي بالمايك فعلاً لتنطفئ الشموع 🎙️✨</p>
-        <button type="button" class="envelope-btn" id="envelopeBtn" aria-label="رسالة">
+          <button type="button" class="envelope-btn" id="envelopeBtn" aria-label="رسالة">
           <svg viewBox="0 0 64 46" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <linearGradient id="envBody" x1="0" y1="0" x2="0" y2="1">
@@ -1155,6 +1147,8 @@ canvas#flowerCanvas{ position:absolute; inset:0; width:100%; height:100%; displa
             <path d="M32 23.6c-1.6-1.9-4.6-.6-4.6 1.4 0 2 2.6 3.4 4.6 5.1 2-1.7 4.6-3.1 4.6-5.1 0-2-3-3.3-4.6-1.4Z" fill="#3d0a10"/>
           </svg>
         </button>
+        </div>
+        <p class="cake-instruction" id="cakeInstruction">انفخي بالمايك فعلاً لتنطفئ الشموع 🎙️✨</p>
       </div>
     </section>
 
@@ -1815,6 +1809,8 @@ function roseWordTick(){
 fireworksVideo.addEventListener('ended', function(){
   fireworksStageWrap.classList.remove('show');
   setTimeout(function(){
+    fireworksVideo.pause();
+    fireworksVideo.style.display = 'none'; // release it, same reasoning as the rose video below
     roseStageWrap.classList.add('show');
     var p = roseVideo.play();
     if(p && p.catch) p.catch(function(){});
@@ -1832,6 +1828,10 @@ function beginCakeTransition(){
     cakeStage.classList.add('substage-show'); // fades in alongside it
     cakeInner.classList.add('cake-in');       // lighter 3D flip-in
     setupMicBlowDetection();
+    setTimeout(function(){
+      roseVideo.pause();
+      roseVideo.style.display = 'none'; // fully release it — some Android WebViews keep a stray hardware video overlay alive otherwise, bleeding through later stages
+    }, 1250);
     setTimeout(function(){
       cakeInner.classList.add('cake-sway'); // gentle continuous sway once the entrance settles
     }, 1300);
@@ -1868,6 +1868,8 @@ function playAloneVideo1(){
 aloneVideo1.addEventListener('ended', function(){
   aloneStageWrap.classList.remove('show');
   setTimeout(function(){
+    aloneVideo1.pause();
+    aloneVideo1.style.display = 'none'; // released — it only ever plays once
     forkStageWrap.classList.add('show');
     startLoopMusic();
   }, 500);
