@@ -501,6 +501,7 @@ button{ -webkit-appearance:none; appearance:none; }
   background:#050505;
   opacity:0;
   pointer-events:none;
+  will-change:opacity;
   transition:opacity 1.2s ease;
   overflow:hidden;
 }
@@ -528,7 +529,7 @@ button{ -webkit-appearance:none; appearance:none; }
   pointer-events:none;
   letter-spacing:.5px;
   clip-path:inset(0 0 0 100%); /* hidden — reveals right-to-left like Arabic script being written */
-  transition:opacity .6s ease, clip-path .6s ease, filter .6s ease; /* smooth fade-out (and not just opacity) when the word is dismissed */
+  transition:opacity 1.3s ease, clip-path 1.3s ease, filter 1.3s ease; /* smooth, gentle fade-out when the word is dismissed */
   z-index:1;
 }
 .rose-word.rose-word-emphasis{
@@ -681,11 +682,17 @@ canvas#flowerCanvas{ position:absolute; inset:0; width:100%; height:100%; displa
 .cake-3d-inner{
   width:min(72vw, 300px);
   transform-style:preserve-3d;
-  transform:rotateY(-70deg) translateZ(-260px) scale(.5);
+  transform:rotateY(-45deg) translateZ(-140px) scale(.6);
   opacity:0;
+  will-change:transform, opacity;
   transition:transform 1.15s cubic-bezier(.16,.84,.44,1), opacity 1.15s ease;
 }
 .cake-3d-inner.cake-in{ transform:rotateY(0) translateZ(0) scale(1); opacity:1; }
+.cake-3d-inner.cake-sway{ animation:cakeSway 6.5s ease-in-out infinite; }
+@keyframes cakeSway{
+  0%,100%{ transform:rotateY(-6deg); }
+  50%{ transform:rotateY(6deg); }
+}
 .cake-svg{ width:100%; height:auto; display:block; }
 
 .flame{
@@ -725,12 +732,12 @@ canvas#flowerCanvas{ position:absolute; inset:0; width:100%; height:100%; displa
 
 .envelope-btn{
   margin-top:28px;
-  width:58px; height:58px;
-  border-radius:50%;
-  border:none;
-  background:radial-gradient(circle at 35% 30%, #3d1e08, #1a0c03);
+  position:relative;
+  border:1px solid rgba(201,164,92,.4);
+  background:linear-gradient(165deg, rgba(30,10,12,.6), rgba(5,5,5,.92));
+  box-shadow:0 0 50px rgba(201,164,92,.08), inset 0 0 30px rgba(92,15,26,.18);
+  padding:16px 22px;
   display:flex; align-items:center; justify-content:center;
-  font-size:1.6rem;
   cursor:pointer;
   touch-action:manipulation;
   opacity:0;
@@ -738,20 +745,31 @@ canvas#flowerCanvas{ position:absolute; inset:0; width:100%; height:100%; displa
   pointer-events:none;
   transition:opacity .6s ease, transform .6s cubic-bezier(.34,1.56,.64,1);
 }
+.envelope-btn::before,.envelope-btn::after{
+  content:''; position:absolute; width:14px; height:14px;
+  border:1px solid var(--gold); opacity:.6;
+}
+.envelope-btn::before{ top:-1px; left:-1px; border-right:none; border-bottom:none; }
+.envelope-btn::after{ bottom:-1px; right:-1px; border-left:none; border-top:none; }
+.envelope-btn svg{ width:46px; height:auto; display:block; }
 .envelope-btn.show{
   opacity:1;
   transform:scale(1);
   pointer-events:auto;
-  animation:envelopeShake 2.6s ease-in-out infinite, forkDotPulse 1.4s ease-in-out infinite;
+  animation:envelopeShake 2.6s ease-in-out infinite, envelopeGlow 1.4s ease-in-out infinite;
 }
 .envelope-btn.out{ opacity:0; transform:scale(.6); pointer-events:none; animation:none; }
 @keyframes envelopeShake{
   0%, 82%, 100%{ transform:rotate(0deg); }
-  85%{ transform:rotate(-9deg); }
-  88%{ transform:rotate(8deg); }
-  91%{ transform:rotate(-6deg); }
-  94%{ transform:rotate(4deg); }
+  85%{ transform:rotate(-5deg); }
+  88%{ transform:rotate(4deg); }
+  91%{ transform:rotate(-3deg); }
+  94%{ transform:rotate(2deg); }
   97%{ transform:rotate(0deg); }
+}
+@keyframes envelopeGlow{
+  0%, 100%{ box-shadow:0 0 18px 4px rgba(255,196,110,.5), 0 0 44px 14px rgba(255,150,60,.3), inset 0 0 30px rgba(92,15,26,.18); }
+  50%{ box-shadow:0 0 26px 8px rgba(255,214,145,.7), 0 0 60px 20px rgba(255,164,75,.4), inset 0 0 30px rgba(92,15,26,.18); }
 }
 
 .smoke-particle{
@@ -1128,7 +1146,25 @@ canvas#flowerCanvas{ position:absolute; inset:0; width:100%; height:100%; displa
           </div>
         </div>
         <p class="cake-instruction" id="cakeInstruction">انفخي بالمايك فعلاً لتنطفئ الشموع 🎙️✨</p>
-        <button type="button" class="envelope-btn" id="envelopeBtn" aria-label="رسالة">📧</button>
+        <button type="button" class="envelope-btn" id="envelopeBtn" aria-label="رسالة">
+          <svg viewBox="0 0 64 46" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="envBody" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#7a1524"/>
+                <stop offset="100%" stop-color="#3d0a10"/>
+              </linearGradient>
+              <linearGradient id="envFlap" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#a4293e"/>
+                <stop offset="100%" stop-color="#661019"/>
+              </linearGradient>
+            </defs>
+            <rect x="2" y="6" width="60" height="38" rx="3" fill="url(#envBody)" stroke="#c9a45c" stroke-width="1.4"/>
+            <path d="M3 7 L32 28 L61 7" fill="none" stroke="#c9a45c" stroke-width="1.2" opacity=".85"/>
+            <path d="M2 8 L32 27 L62 8 L62 10 L32 30 L2 10 Z" fill="url(#envFlap)" stroke="#c9a45c" stroke-width="1.2"/>
+            <circle cx="32" cy="27" r="6.4" fill="#c9a45c"/>
+            <path d="M32 23.6c-1.6-1.9-4.6-.6-4.6 1.4 0 2 2.6 3.4 4.6 5.1 2-1.7 4.6-3.1 4.6-5.1 0-2-3-3.3-4.6-1.4Z" fill="#3d0a10"/>
+          </svg>
+        </button>
       </div>
     </section>
 
@@ -1768,7 +1804,7 @@ var roseWords = [
   { el: null, time: 20.5, showUntil: 23.0 },  // ومازلت
   { el: null, time: 32.5, showUntil: 34.0 },  // نعرفه (الأولى) — أُخّرت لتظهر بعد اكتمال المسار الأزرق كما طلبت
   { el: null, time: 37.5, showUntil: 39.0 },  // ونبقى — الهدوء المؤقت أثناء المسار الأزرق (00:37.0–00:39.0)
-  { el: null, time: 48.0, showUntil: 52.0 }   // نعرفه (الثانية) — أُخّرت قليلاً أكثر بطلب لطفي
+  { el: null, time: 50.0, showUntil: 55.0 }   // نعرفه (الثانية) — أُخّرت أكثر بطلب لطفي
 ];
 for(var rw = 0; rw < roseWords.length; rw++){
   roseWords[rw].el = document.getElementById('roseWord' + (rw + 1));
@@ -1799,10 +1835,13 @@ fireworksVideo.addEventListener('ended', function(){
 roseVideo.addEventListener('ended', function(){
   goToStage3(); // slide happens now, while roseStageWrap is still fully opaque — invisible
   setTimeout(function(){
-    roseStageWrap.classList.remove('show');  // 1.2s fade out
+    roseStageWrap.classList.remove('show');   // 1.2s pure opacity fade out
     cakeStage.classList.add('substage-show'); // fades in alongside it
-    cakeInner.classList.add('cake-in');
+    cakeInner.classList.add('cake-in');       // lighter 3D flip-in (see will-change + reduced distance above)
     setupMicBlowDetection();
+    setTimeout(function(){
+      cakeInner.classList.add('cake-sway'); // gentle continuous sway once the entrance settles
+    }, 1300);
   }, 1200);
 });
 
