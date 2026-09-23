@@ -1838,8 +1838,8 @@ function beginCakeTransition(){
   }, 1200);
 }
 roseVideo.addEventListener('timeupdate', function(){
-  if(roseVideo.duration && (roseVideo.duration - roseVideo.currentTime) <= 1.2){
-    beginCakeTransition(); // starts while the video still has its last moment playing — a real cross-dissolve, not a hard cut
+  if(roseVideo.duration && (roseVideo.duration - roseVideo.currentTime) <= 2.5){
+    beginCakeTransition(); // starts earlier now, well before the video's last frame — a longer, more gradual cross-dissolve
   }
 });
 roseVideo.addEventListener('ended', beginCakeTransition); // fallback, in case timeupdate ever misses the window
