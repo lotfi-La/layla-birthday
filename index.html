@@ -510,7 +510,9 @@ button{ -webkit-appearance:none; appearance:none; }
   width:100%; height:100%;
   object-fit:cover;
   display:block;
+  transition:opacity 2.4s ease;
 }
+.rose-stage-wrap video.rose-video-dim{ opacity:0; }
 .rose-word{
   position:absolute;
   left:50%; top:50%;
@@ -1837,8 +1839,25 @@ function beginCakeTransition(){
     }, 1300);
   }, 1200);
 }
+var roseVideoDimStarted = false;
 roseVideo.addEventListener('timeupdate', function(){
-  if(roseVideo.duration && (roseVideo.duration - roseVideo.currentTime) <= 2.5){
+  if(!roseVideo.duration) return;
+  var remaining = roseVideo.duration - roseVideo.currentTime;
+
+  // audio fade-out: gradual volume ramp-down starting ~5s before the end
+  var AUDIO_FADE_WINDOW = 5.0;
+  if(remaining <= AUDIO_FADE_WINDOW){
+    roseVideo.volume = Math.max(0, remaining / AUDIO_FADE_WINDOW);
+  }
+
+  // visual fade-to-black: starts a bit before the cross-dissolve to the cake, so the
+  // video is already dimming out (not still bright/busy) once the cake starts appearing
+  if(remaining <= 3.2 && !roseVideoDimStarted){
+    roseVideoDimStarted = true;
+    roseVideo.classList.add('rose-video-dim');
+  }
+
+  if(remaining <= 2.5){
     beginCakeTransition(); // starts earlier now, well before the video's last frame — a longer, more gradual cross-dissolve
   }
 });
