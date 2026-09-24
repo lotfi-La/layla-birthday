@@ -1534,6 +1534,8 @@ var activeCandleCheckpoint = null;
    object-fit:cover crop, so the button sits exactly on the candle/hand/spark
    regardless of viewport size/aspect. Generalized so any full-screen cover
    video in the site (welcome video, fireworks video, ...) can reuse it. */
+function clamp(v, min, max){ return Math.min(Math.max(v, min), max); }
+
 function videoPointToScreenFor(video, fx, fy){
   var vw = video.videoWidth, vh = video.videoHeight;
   var cw = window.innerWidth, ch = window.innerHeight;
@@ -1671,7 +1673,6 @@ resumeBtn.addEventListener('click', function(){
    شبحية عالقة على الشاشة. */
 
 function goToStage3(){
-  clearTypewriter();
   stagesTrack.classList.add('to-stage3');
 }
 
