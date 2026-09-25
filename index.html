@@ -1797,6 +1797,12 @@ function playFireworksVideoNow(){
   roseVideo.load(); // buffer the next stage's video now, during the ~5s fireworks clip, so it's ready the instant it's needed
   var p = fireworksVideo.play();
   if(p && p.catch) p.catch(function(){});
+  // من هنا فصاعدًا لا رجعة لأي من مراحل المفترق — نحررها كليًا من الرندر لتخفيف الحمل عن المعالج أثناء تشغيل الفيديو
+  wishStageWrap.style.display = 'none';
+  forkStageWrap.style.display = 'none';
+  launchStageWrap.style.display = 'none';
+  aloneStageWrap.style.display = 'none';
+  memeStageWrap.style.display = 'none';
 }
 
 /* ================= STAGE 6: ROSE VIDEO — cinematic lyric overlay ================= */
@@ -1840,7 +1846,7 @@ fireworksVideo.addEventListener('ended', function(){
 });
 
 var roseTransitionStarted = false;
-/* ================= CAKE STAGE: background music (fades in, loops gapless, keeps playing through the letter + final video) ================= */
+/* ================= FINAL CLOSING VIDEO: background music (fades in, loops gapless) — الكيكة والرسالة بلا موسيقى بقرار منه، الموسيقى فقط مع الفيديو الختامي ================= */
 var cakeLoopBuffer = null, cakeLoopBufferPromise = null, cakeLoopSource = null, cakeLoopGain = null;
 var cakeLoopStarted = false;
 
@@ -1881,7 +1887,6 @@ function beginCakeTransition(){
     roseStageWrap.classList.remove('show');   // 1.2s pure opacity fade out
     cakeStage.classList.add('substage-show'); // fades in alongside it
     cakeInner.classList.add('cake-in');       // lighter 3D flip-in
-    startCakeLoopMusic();                     // موسيقى خلفية هادئة تبدأ الآن وتستمر عبر الرسالة والفيديو الختامي
     setupMicBlowDetection();
     setTimeout(function(){
       roseVideo.pause();
@@ -2231,6 +2236,7 @@ envelopeBtn.addEventListener('click', function(){
     envelopeBtn.classList.add('out');
     letterOverlay.classList.add('show');
     finalVideo.load(); // تحميل مسبق أثناء قراءتها للرسالة — يكون جاهزًا فور الضغط على متابعة
+    document.getElementById('stagesViewport').style.display = 'none'; // الكيكة لن تظهر ثانية أبدًا من هنا — نوقف حركة التمايل اللانهائية ونحرر المعالج بالكامل
   }, 480); // يبدأ ظهور البطاقة بعد أن يكتمل انفتاح الغلاف تقريبًا
 });
 
@@ -2248,8 +2254,10 @@ function fireConfetti(){
 letterContinueBtn.addEventListener('click', function(){
   letterOverlay.classList.remove('show'); // تلاشي الرسالة (٠.٥ ثانية، كما في ظهورها)
   setTimeout(function(){
+    letterOverlay.style.display = 'none'; // تحرير كامل — لا داعٍ لإبقائها في شجرة الرندر بعد الآن
     finalStageWrap.classList.add('show');
-    var p = finalVideo.play(); // بلا صوت (muted) — موسيقى الكيكة مستمرة تحته من الخلفية
+    startCakeLoopMusic(); // الموسيقى تبدأ الآن فقط، مع الفيديو الختامي وحده
+    var p = finalVideo.play(); // بلا صوت (muted)
     if(p && p.catch) p.catch(function(){});
   }, 550);
 });
