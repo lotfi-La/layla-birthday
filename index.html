@@ -900,7 +900,9 @@ button{ -webkit-appearance:none; appearance:none; }
   width:100%; height:100%;
   object-fit:cover;
   display:block;
+  transition:opacity 1.8s ease;
 }
+.final-stage-wrap video.final-video-done{ opacity:0; }
 @keyframes letterLineIn{
   from{ opacity:0; transform:translateY(8px); }
   to{ opacity:1; transform:translateY(0); }
@@ -1517,7 +1519,12 @@ var introCard = document.getElementById('introCard');
 
 function proceedPastIntro(){
   introScreen.classList.add('intro-hide');
-  setTimeout(function(){ introScreen.style.display = 'none'; }, 450);
+  setTimeout(function(){
+    introScreen.style.display = 'none';
+    welcomeVideo.pause();
+    welcomeVideo.removeAttribute('src');
+    welcomeVideo.load(); // يحرر ذاكرة فك التشفير فورًا بدل إبقاء المؤشر محتجزًا خلف الكواليس
+  }, 450);
   unlockAudio();
   wishStageWrap.classList.add('show');
   setTimeout(function(){ wishInput.focus({ preventScroll:true }); }, 500);
@@ -1797,12 +1804,15 @@ function playFireworksVideoNow(){
   roseVideo.load(); // buffer the next stage's video now, during the ~5s fireworks clip, so it's ready the instant it's needed
   var p = fireworksVideo.play();
   if(p && p.catch) p.catch(function(){});
-  // من هنا فصاعدًا لا رجعة لأي من مراحل المفترق — نحررها كليًا من الرندر لتخفيف الحمل عن المعالج أثناء تشغيل الفيديو
-  wishStageWrap.style.display = 'none';
-  forkStageWrap.style.display = 'none';
-  launchStageWrap.style.display = 'none';
-  aloneStageWrap.style.display = 'none';
-  memeStageWrap.style.display = 'none';
+  // من هنا فصاعدًا لا رجعة لأي من مراحل المفترق — نحررها من الرندر بعد لحظة (لا في نفس اللحظة، حتى لا نقاطع
+  // تلاشي launchStageWrap في منتصفه أو نزاحم تحميل roseVideo أعلاه على نفس الإطار الزمني)
+  setTimeout(function(){
+    wishStageWrap.style.display = 'none';
+    forkStageWrap.style.display = 'none';
+    launchStageWrap.style.display = 'none';
+    aloneStageWrap.style.display = 'none';
+    memeStageWrap.style.display = 'none';
+  }, 1200);
 }
 
 /* ================= STAGE 6: ROSE VIDEO — cinematic lyric overlay ================= */
@@ -1838,6 +1848,8 @@ fireworksVideo.addEventListener('ended', function(){
   setTimeout(function(){
     fireworksVideo.pause();
     fireworksVideo.style.display = 'none'; // release it, same reasoning as the rose video below
+    fireworksVideo.removeAttribute('src');
+    fireworksVideo.load(); // تفريغ فوري لذاكرة فك التشفير
     roseStageWrap.classList.add('show');
     var p = roseVideo.play();
     if(p && p.catch) p.catch(function(){});
@@ -1846,7 +1858,7 @@ fireworksVideo.addEventListener('ended', function(){
 });
 
 var roseTransitionStarted = false;
-/* ================= FINAL CLOSING VIDEO: background music (fades in, loops gapless) — الكيكة والرسالة بلا موسيقى بقرار منه، الموسيقى فقط مع الفيديو الختامي ================= */
+/* ================= CAKE STAGE: background music — تبدأ هادئة جدًا مع ظهور الكيكة (خلفية لا إزعاج)، وترتفع للمستوى الطبيعي عند الضغط على "متابعة" في الرسالة، وتستمر بلا توقف حتى الفيديو الختامي ================= */
 var cakeLoopBuffer = null, cakeLoopBufferPromise = null, cakeLoopSource = null, cakeLoopGain = null;
 var cakeLoopStarted = false;
 
@@ -1875,7 +1887,7 @@ function startCakeLoopMusic(){
     var now = audioCtx.currentTime;
     cakeLoopGain.gain.cancelScheduledValues(now);
     cakeLoopGain.gain.setValueAtTime(0.0001, now);
-    cakeLoopGain.gain.linearRampToValueAtTime(1, now + 2.2); // تلاشي دخول هادئ يطابق بداية المقطع الهادئة
+    cakeLoopGain.gain.linearRampToValueAtTime(0.22, now + 2.2); // خلفية هادئة جدًا مع الكيكة والرسالة — ترتفع للمستوى الطبيعي لاحقًا عند الضغط على متابعة
   }).catch(function(){ /* الملف غير متاح — تُترك التجربة صامتة بدل أن تنكسر */ });
 }
 
@@ -1887,10 +1899,13 @@ function beginCakeTransition(){
     roseStageWrap.classList.remove('show');   // 1.2s pure opacity fade out
     cakeStage.classList.add('substage-show'); // fades in alongside it
     cakeInner.classList.add('cake-in');       // lighter 3D flip-in
+    startCakeLoopMusic();                     // موسيقى خلفية هادئة جدًا تبدأ الآن، وترتفع لاحقًا عند "متابعة"
     setupMicBlowDetection();
     setTimeout(function(){
       roseVideo.pause();
       roseVideo.style.display = 'none'; // fully release it — some Android WebViews keep a stray hardware video overlay alive otherwise, bleeding through later stages
+      roseVideo.removeAttribute('src');
+      roseVideo.load(); // تفريغ فوري لذاكرة فك التشفير
     }, 1250);
     setTimeout(function(){
       cakeInner.classList.add('cake-sway'); // gentle continuous sway once the entrance settles
@@ -1947,6 +1962,8 @@ aloneVideo1.addEventListener('ended', function(){
   setTimeout(function(){
     aloneVideo1.pause();
     aloneVideo1.style.display = 'none'; // released — it only ever plays once
+    aloneVideo1.removeAttribute('src');
+    aloneVideo1.load(); // تفريغ فوري لذاكرة فك التشفير
     forkStageWrap.classList.add('show');
     startLoopMusic();
   }, 500);
@@ -2253,13 +2270,24 @@ function fireConfetti(){
 /* ================= STAGE 8: LETTER -> FINAL CLOSING VIDEO ================= */
 letterContinueBtn.addEventListener('click', function(){
   letterOverlay.classList.remove('show'); // تلاشي الرسالة (٠.٥ ثانية، كما في ظهورها)
+  if(cakeLoopGain && audioCtx){ // رفع صوت موسيقى الكيكة (كانت خلفية هادئة) للمستوى الطبيعي الآن مع الفيديو الختامي
+    var vNow = audioCtx.currentTime;
+    cakeLoopGain.gain.cancelScheduledValues(vNow);
+    cakeLoopGain.gain.setValueAtTime(cakeLoopGain.gain.value, vNow);
+    cakeLoopGain.gain.linearRampToValueAtTime(1, vNow + 1.8);
+  }
   setTimeout(function(){
     letterOverlay.style.display = 'none'; // تحرير كامل — لا داعٍ لإبقائها في شجرة الرندر بعد الآن
     finalStageWrap.classList.add('show');
-    startCakeLoopMusic(); // الموسيقى تبدأ الآن فقط، مع الفيديو الختامي وحده
-    var p = finalVideo.play(); // بلا صوت (muted)
+    var p = finalVideo.play(); // بلا صوت (muted) — موسيقى الكيكة (مرتفعة الآن) هي الخلفية الصوتية الوحيدة
     if(p && p.catch) p.catch(function(){});
   }, 550);
+});
+
+/* عند انتهاء الفيديو الختامي: تلاشي الفيديو نفسه إلى الأسود الصافي (الخلفية أصلًا سوداء) —
+   حتى يتضح بصريًا إنه وصل لنهايته الطبيعية وليس معلّقًا أو متجمدًا */
+finalVideo.addEventListener('ended', function(){
+  finalVideo.classList.add('final-video-done');
 });
 
 })();
